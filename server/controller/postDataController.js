@@ -1,5 +1,6 @@
 const postdata = require('../database/schema/postDataSchema');
 const userInfo=require('../database/schema/userInfoSchema');
+
 const Add_post_with_email = async (req, resp) => {
     const { email, postContent } = req.body;
 
@@ -26,4 +27,29 @@ const Add_post_with_email = async (req, resp) => {
     }
 };
 
-module.exports = { Add_post_with_email };
+
+
+//  66e1746b7ef3c026346be6bc
+const Delete_post_by_id = async (req, resp) => {
+    const { id } = req.body;
+
+    try {
+     
+        const find_post_by_id = await postdata.findOne({ _id: id });
+
+        if (find_post_by_id) {
+            // Delete the post and await the result
+            const deleted_post_data = await postdata.findByIdAndDelete(id);
+            return resp.status(200).json({ "message": "Post is deleted", deletedPostData: deleted_post_data });
+        } else {
+            return resp.status(404).json({ "message": "Post not found" });
+        }
+
+    } catch (error) {
+        // Log the error for debugging purposes
+        console.error(error);
+        resp.status(500).json({ "message": "Internal server error" });
+    }
+};
+
+module.exports = { Add_post_with_email ,Delete_post_by_id};
