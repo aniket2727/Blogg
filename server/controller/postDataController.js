@@ -28,8 +28,6 @@ const Add_post_with_email = async (req, resp) => {
 };
 
 
-
-//  66e1746b7ef3c026346be6bc
 const Delete_post_by_id = async (req, resp) => {
     const { id } = req.body;
     console.log("debugg",id);
@@ -51,4 +49,27 @@ const Delete_post_by_id = async (req, resp) => {
     }
 };
 
-module.exports = { Add_post_with_email ,Delete_post_by_id};
+
+const Update_post_by_id = async (req, resp) => {
+    const { id, updatedPost } = req.body;
+
+    try {
+        // Update the post by ID and return the updated document
+        const updated_data = await postdata.findByIdAndUpdate(
+            id,
+            { postContent: updatedPost },
+            { new: true } // Return the updated document
+        );
+
+        if (updated_data) {
+            return resp.status(200).json({ "message": "Post updated successfully", updatedPostData: updated_data });
+        } else {
+            return resp.status(404).json({ "message": "Post not found" });
+        }
+    } catch (error) {
+        console.error(error);
+        resp.status(500).json({ "message": "Internal server error" });
+    }
+};
+
+module.exports = { Add_post_with_email ,Delete_post_by_id,update_post_by_id};
