@@ -1,5 +1,5 @@
 const UserInfo = require('../database/schema/userInfoSchema'); // Ensure this matches the export
-
+const jwt = require('jsonwebtoken');
 const Add_User_to_Database = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -26,14 +26,21 @@ const Login_user_with_email = async (req, res) => {
 
         if (user_Data_with_email) {
             if (password === user_Data_with_email.password) {
-                // Set cookie (e.g., a session cookie or a token)
-                res.cookie('user', user_Data_with_email._id, {
+                // Generate JWT token
+                const token = jwt.sign(
+                    { userId: user_Data_with_email._id, email: user_Data_with_email.email },
+                    'your_secret_key', // Replace with your actual secret key
+                    { expiresIn: '1h' } // Token expiry time
+                );
+
+                // Set cookie with the token
+                res.cookie('token', token, {
                     httpOnly: true, // Cookie cannot be accessed via JavaScript (prevents XSS)
                     secure: true,   // Set to true if your site is HTTPS
                     sameSite: 'Strict' // Cookie sent only for same-site requests
                 });
 
-                return res.status(200).json({ message: "User login successful", user: user_Data_with_email });
+                return res.status(200).json({ message: "User login successful", user: user_Data_with_email, token });
             } else {
                 return res.status(401).json({ message: "Incorrect password" });
             }
