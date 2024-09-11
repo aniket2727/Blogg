@@ -35,10 +35,7 @@ const Delete_post_by_id = async (req, resp) => {
     console.log("debugg",id);
 
     try {
-     
         const find_post_by_id = await postdata.findOne({ _id: id });
-      
-
         if (find_post_by_id) {
             // Delete the post and await the result
             const deleted_post_data = await postdata.findByIdAndDelete(id);
