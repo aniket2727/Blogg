@@ -33,7 +33,7 @@ app.use('/app/user', add_user_router);
 app.use('/app/login', login_user_router);
 app.use('/app/password', update_user_password);
 app.use('/app/post', add_postdata_router);
-app.use('/app/post', delete_post_by_id_router);
+app.use('/app', delete_post_by_id_router);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
