@@ -27,11 +27,13 @@ const add_user_router = require('./router/userinfoRouter');
 const login_user_router=require('./router/userinfoRouter');
 const update_user_password=require('./router/updatePasswordRouter');
 const add_postdata_router=require('./router/postDataRouter');
+const delete_post_by_id_router=require('./router/deletePostRouter')
 // Use the routes
-app.use('/app', add_user_router);
-app.use('/app',login_user_router);
-app.use('/app',update_user_password);
-app.use('/app',add_postdata_router);
+app.use('/app/user', add_user_router);
+app.use('/app/login', login_user_router);
+app.use('/app/password', update_user_password);
+app.use('/app/post', add_postdata_router);
+app.use('/app/post', delete_post_by_id_router);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

@@ -32,10 +32,12 @@ const Add_post_with_email = async (req, resp) => {
 //  66e1746b7ef3c026346be6bc
 const Delete_post_by_id = async (req, resp) => {
     const { id } = req.body;
+    console.log("debugg",id);
 
     try {
      
         const find_post_by_id = await postdata.findOne({ _id: id });
+        console.log("debugg",find_post_by_id);
 
         if (find_post_by_id) {
             // Delete the post and await the result
