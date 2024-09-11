@@ -13,9 +13,9 @@ const Add_post_with_email = async (req, resp) => {
                 email: email,
                 postContent: postContent
             });
-            await post_content_to_save.save();
+            const postCreated= await post_content_to_save.save();
 
-            return resp.status(201).json({ "message": "Post is saved successfully" });
+            return resp.status(201).json({ "message": "Post is saved successfully" ,"postcontent":postCreated});
         } else {
             return resp.status(401).json({ "message": "Email is not found" });
         }
