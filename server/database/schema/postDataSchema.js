@@ -4,15 +4,15 @@ const mongoose = require('mongoose');
 const postSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: true  // Corrected from 'require' to 'required'
+        required: true
     },
     postContent: {
         type: String,
-        required: true  // Corrected from 'require' to 'required'
+        required: true
     }
 });
 
 // Model for schema
-const postDataModel = mongoose.model('postdata', postSchema);
+const PostData = mongoose.model('PostData', postSchema);
 
-module.exports = { postDataModel };
+module.exports = PostData;

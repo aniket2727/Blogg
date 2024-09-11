@@ -26,10 +26,12 @@ db.once('open', () => {
 const add_user_router = require('./router/userinfoRouter');
 const login_user_router=require('./router/userinfoRouter');
 const update_user_password=require('./router/updatePasswordRouter');
+const add_postdata_router=require('./router/postDataRouter');
 // Use the routes
 app.use('/app', add_user_router);
 app.use('/app',login_user_router);
 app.use('/app',update_user_password);
+app.use('/app',add_postdata_router);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
