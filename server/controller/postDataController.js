@@ -72,4 +72,4 @@ const Update_post_by_id = async (req, resp) => {
     }
 };
 
-module.exports = { Add_post_with_email ,Delete_post_by_id,update_post_by_id};
+module.exports = { Add_post_with_email ,Delete_post_by_id,Update_post_by_id};
