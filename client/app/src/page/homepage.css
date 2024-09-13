@@ -1,0 +1,36 @@
+
+
+.main-parent-div{
+    margin: 30px;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(139, 97, 146);
+    box-shadow: 5px 5px 5px rgb(101, 94, 94);
+    border-top-left-radius: 30px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 30px;
+    border-bottom-left-radius: 5px;
+}
+
+
+.left-side-div{
+    margin: 10px;
+    width: 60%;
+    height: 80%;
+}
+
+.left-side-div img{
+    height: 100%;
+    width: 100%;
+    border-radius: 10px;
+}
+
+
+.right-side-div{
+    margin: 10px;
+    width: 30%;
+    border: 1px solid red;
+    height: 80%;
+}
