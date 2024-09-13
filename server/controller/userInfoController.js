@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const Add_User_to_Database = async (req, res) => {
     const { name, email, password } = req.body;
 
+    console.log(name,email,password);
+
     try {
         const existingUser = await UserInfo.findOne({ email });
         if (existingUser) {
