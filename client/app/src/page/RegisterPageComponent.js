@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useCallback } from 'react';
 import debounce from 'lodash/debounce';
+import Registerapis from '../customHook/RegisterApi';
 
 const RegisterPageComponent = () => {
   const [registerData, setRegisterData] = useState({
@@ -18,9 +19,14 @@ const RegisterPageComponent = () => {
   };
 
   // Debounced function for form submission
-  const handleSubmit = useCallback(debounce((data) => {
+  const handleSubmit = useCallback(debounce(async (data) => {
     console.log(data);
-    // Add your form submission logic here
+    try {
+      const result = await Registerapis(data); 
+      console.log("Result of register API: ", result);
+    } catch (error) {
+      console.log("Error in register: ", error);
+    }
   }, 300), []);
 
   const onSubmit = (e) => {

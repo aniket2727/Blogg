@@ -3,13 +3,20 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import debounce from 'lodash/debounce';
 import { useCallback } from 'react';
+import Loginapis from '../customHook/LoginApi';
 
 const MyLoginform = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   // Debounced function for form submission
-  const handleLoginSubmit = useCallback(debounce((data) => {
-    console.log(data);
+  const handleLoginSubmit = useCallback(debounce(async (data) => {
+    console.log("Submitted data:", data);
+    try {
+      const result = await Loginapis({ email: data.email, password: data.password }); // Pass as an object
+      console.log("The result of login API is:", result);
+    } catch (error) {
+      console.error("Error in login API:", error);
+    }
   }, 300), []);
 
   // Wrap the debounced function call
