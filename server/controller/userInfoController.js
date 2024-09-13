@@ -22,6 +22,7 @@ const Add_User_to_Database = async (req, res) => {
 
 const Login_user_with_email = async (req, res) => {
     const { email, password } = req.body;
+    console.log(email,password);
 
     try {
         const user_Data_with_email = await UserInfo.findOne({ email: email });
@@ -48,7 +49,8 @@ const Login_user_with_email = async (req, res) => {
             }
         }
 
-        res.status(404).json({ message: "Email is not valid" });
+        res.status(404).json({ message: "Email is not valid,pleases provide valid email" });
+       
     } catch (error) {
         console.error("Error in Login_user_with_email:", error);
         res.status(500).json({ message: "Internal server error" });

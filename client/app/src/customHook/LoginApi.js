@@ -1,7 +1,5 @@
-/* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
+// Loginapis.js
 
-const url = 'http://localhost:9009/app';
 
 // Helper function for email validation
 const validateEmail = (email) => {
@@ -10,68 +8,47 @@ const validateEmail = (email) => {
 };
 
 const Loginapis = async ({ email, password }) => {
-    const [status, setStatus] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    const [data, setData] = useState(null);
-
-    // Input validation
     if (!email || !password) {
-        setStatus("Please provide both email and password");
-        setError(true);
-        setLoading(false);
-        return { status, loading, error, data };
+        throw new Error("Please provide both email and password");
     }
 
     if (!validateEmail(email)) {
-        setStatus("Invalid email format");
-        setError(true);
-        setLoading(false);
-        return { status, loading, error, data };
+        throw new Error("Invalid email format");
     }
 
     try {
-        setLoading(true);
-        const apiResponse = await fetch(`${url}/login`, {
+        const apiResponse = await fetch(`http://localhost:9009/app1/login`, {
             method: 'POST',
             body: JSON.stringify({ email, password }),
             headers: {
                 'Content-Type': 'application/json'
             },
-            // Add timeout (optional, based on how you want to handle long requests)
             signal: AbortSignal.timeout(5000) // 5 seconds timeout
         });
 
+        console.log(apiResponse);
+
         const result = await apiResponse.json();
+        console.log("result",result);
 
         if (!apiResponse.ok) {
-            // Use specific HTTP status codes for better error handling
             let errorMessage = 'Failed to login';
             if (apiResponse.status === 401) {
                 errorMessage = 'Unauthorized access. Check credentials';
             } else if (apiResponse.status === 400) {
                 errorMessage = 'Bad request. Please check the input';
             }
+            else if(apiResponse.status===404){
+                errorMessage="email is not register or register";
+            }
             throw new Error(result.message || errorMessage);
         }
 
-        // Save JWT token to localStorage (if applicable)
-        if (result.token) {
-            localStorage.setItem('token', result.token);
-        }
-
-        setData(result);
-        setStatus("Login successful");
-        setError(false);
+        return result;
     } catch (error) {
-        setStatus(error.message || "Failed to login");
-        setError(true);
-        console.error("Error:", error);
-    } finally {
-        setLoading(false);
+      
+        throw new Error(error.message || "Failed to login");
     }
-
-    return { status, loading, error, data };
 };
 
 export default Loginapis;

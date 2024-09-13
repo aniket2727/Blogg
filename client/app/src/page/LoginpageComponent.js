@@ -1,21 +1,36 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React from 'react';
+// MyLoginform.js
+import React, { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import debounce from 'lodash/debounce';
-import { useCallback } from 'react';
 import Loginapis from '../customHook/LoginApi';
 
 const MyLoginform = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   // Debounced function for form submission
   const handleLoginSubmit = useCallback(debounce(async (data) => {
-    console.log("Submitted data:", data);
+    console.log(data);
+    setLoading(true);
+    setError(false);
+    setStatus("");
+
     try {
-      const result = await Loginapis({ email: data.email, password: data.password }); // Pass as an object
+      const result = await Loginapis({ email: data.email, password: data.password });
       console.log("The result of login API is:", result);
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+      }
+      setStatus("Login successful");
     } catch (error) {
-      console.error("Error in login API:", error);
+      console.log("this run")
+      setStatus(error.message || "Failed to login");
+      setError(true);
+    } finally {
+      setLoading(false);
     }
   }, 300), []);
 
@@ -61,11 +76,17 @@ const MyLoginform = () => {
           {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
         </div>
 
+        {status && (
+          <p className={`text-xs mt-1 ${error ? 'text-red-500' : 'text-green-500'}`}>
+            {status}
+          </p>
+        )}
+
         <button 
           type="submit" 
           className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
-          Submit
+          {loading ? "Loading..." : "Submit"}
         </button>
       </form>
     </div>

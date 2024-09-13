@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors=require('cors');
 const app = express();
 const port = 9009;
+app.use(express.json()); // To parse JSON request bodies
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
@@ -30,7 +31,7 @@ const add_postdata_router=require('./router/postDataRouter');
 const delete_post_by_id_router=require('./router/deletePostRouter')
 // Use the routes
 app.use('/app', add_user_router);
-app.use('/app/login', login_user_router);
+app.use('/app1', login_user_router);
 app.use('/app/password', update_user_password);
 app.use('/app/post', add_postdata_router);
 app.use('/app', delete_post_by_id_router);
