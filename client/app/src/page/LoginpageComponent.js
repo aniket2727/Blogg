@@ -6,7 +6,7 @@ import debounce from 'lodash/debounce';
 import Loginapis from '../customHook/LoginApi';
 
 const MyLoginform = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit,reset, formState: { errors } } = useForm();
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -25,6 +25,8 @@ const MyLoginform = () => {
         localStorage.setItem('token', result.token);
       }
       setStatus("Login successful");
+      //after successfull login want to set null value of email and password
+      reset(); // Clear form fields after successful login
     } catch (error) {
       console.log("this run")
       setStatus(error.message || "Failed to login");
