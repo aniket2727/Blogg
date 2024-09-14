@@ -72,4 +72,19 @@ const Update_post_by_id = async (req, resp) => {
     }
 };
 
-module.exports = { Add_post_with_email ,Delete_post_by_id,Update_post_by_id};
+const Getallpost = async (req, resp) => {
+    try {
+      const getallpostdata = await postdata.find();
+  
+      if (getallpostdata && getallpostdata.length > 0) {
+        resp.status(200).json({ message: "Data has been sent", getallpostdata });
+      } else {
+        resp.status(404).json({ message: "No posts found" });
+      }
+    } catch (error) {
+      console.error("Error occurred: ", error);
+      resp.status(500).json({ message: "Internal server error" });
+    }
+  };
+  
+module.exports = { Add_post_with_email ,Delete_post_by_id,Update_post_by_id,Getallpost};
