@@ -2,9 +2,13 @@ import React from 'react';
 import Typewriter from 'typewriter-effect';
 import './homepage.css';
 import homepageImage from '../static File/homepage-image.jpg';
-
+import SlideComponent from '../component/SlideComponent';
 const HomepageComponent = () => {
   return (
+    <> 
+    <div>
+       <SlideComponent/>
+    </div>
     <div className='main-parent-div'>
       <div className='left-side-div'>
         <img src={homepageImage} alt='Home Page' />
@@ -33,6 +37,7 @@ const HomepageComponent = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
