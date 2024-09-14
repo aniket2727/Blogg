@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configure default Axios settings if needed
 axios.defaults.baseURL = 'http://localhost:9009/app';
-axios.defaults.headers.common['Authorization'] = 'Bearer YOUR_TOKEN'; // Example header, adjust as needed
+//axios.defaults.headers.common['Authorization'] = 'Bearer YOUR_TOKEN'; // Example header, adjust as needed
 
 const GetAllpostdata = async () => {
   try {

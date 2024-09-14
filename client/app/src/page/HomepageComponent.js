@@ -3,6 +3,8 @@ import Typewriter from 'typewriter-effect';
 import './homepage.css';
 import homepageImage from '../static File/homepage-image.jpg';
 import SlideComponent from '../component/SlideComponent';
+import DisplayPostComponent from '../component/DisplayPostComponent';
+
 const HomepageComponent = () => {
   return (
     <> 
@@ -37,6 +39,7 @@ const HomepageComponent = () => {
         </div>
       </div>
     </div>
+    <DisplayPostComponent/>
     </>
   );
 };
