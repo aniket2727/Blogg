@@ -3,6 +3,7 @@ const router=express.Router();
 const {Add_post_with_email,Getallpost}=require('../controller/postDataController');
 const middleware=require('../middleware/tokenAuthMiddleware')
 router.post('/addpost',middleware,Add_post_with_email);
+router.get('/getallpost',Getallpost);
 module.exports = router; 
 
 
