@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import GetAllpostdata from '../customHook/GetallPostdataApi';
+import ButtonComponent from './ButtonComponent';
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
@@ -8,14 +9,19 @@ const DisplayPostComponent = () => {
 
     const callApisforPostData = async () => {
         try {
-            const result = await GetAllpostdata(); // Await the result here
-            setPosts(result.getallpostdata); // Store the result in state
-            console.log("data for all post", result.getallpostdata);
+            const result = await GetAllpostdata();
+            setPosts(result.getallpostdata);
+            console.log("Data for all posts:", result.getallpostdata);
+
+            // Example of accessing postContent length
+            if (result.getallpostdata.length > 0) {
+                console.log("First post content length:", result.getallpostdata[0]?.postContent?.length);
+            }
         } catch (error) {
-            setError("Failed to fetch posts"); // Set an error message in state
-            console.error("The error is:", error); // Log the error
+            setError("Failed to fetch posts");
+            console.error("The error is:", error);
         } finally {
-            setLoading(false); // Set loading to false once data is fetched or error occurs
+            setLoading(false);
         }
     };
 
@@ -23,22 +29,32 @@ const DisplayPostComponent = () => {
         callApisforPostData();
     }, []);
 
-    if (loading) return <p>Loading...</p>; // Show loading message while data is being fetched
+    if (loading) return <p className="font-bold text-green-600">Loading...</p>; // Show loading message while data is being fetched
 
-    if (error) return <p>{error}</p>; // Show error message if there's an error
+    if (error) return <p className="font-bold text-red-600">{error}</p>; // Show error message if there's an error
 
-    if (posts.length < 0 && !posts) {
+    if (posts.length === 0) {
         return (
-            <div style={{ display: "flex", alignItems: 'center', justifyContent: 'center' }}>
-                <p style={{fontWeight:'bold', color:"red"}}>Oops curruntly no post available</p>
+            <div className="flex items-center justify-center p-4">
+                <p className="font-bold text-red-600">Oops, currently no posts available</p>
             </div>
-        )
+        );
     }
 
     return (
-        <div>
-            <h1>Display Post</h1>
-
+        <div className="space-y-4">
+            {posts.map((item, index) => (
+                <div key={index} className="bg-white shadow-md rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h1 className="text-xl font-semibold">{item.email}</h1>
+                        <ButtonComponent buttonText="Follow" />
+                    </div>
+                    <div>
+                        <p className="text-gray-700">{item.postContent}</p>
+                        {item.postContent.length <50 && <div className="h-12 w-full"></div>}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 };
