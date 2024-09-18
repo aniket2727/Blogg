@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter,Route,Routes } from 'react-router-dom'
 import { LoginDetailsProvider } from './contextApis/LoginDetailsContext'
 import NavbarComponent from './component/NavbarComponent'
+import Footer from './component/FooterComponent'
 import MyLoginform from './page/LoginpageComponent'
 import RegisterFormPageComponent from './page/RegisterPageComponent'
 import HomepageComponent from './page/HomepageComponent'
@@ -26,6 +27,7 @@ const App = () => {
             <Route path='/createpost' element={<Createpost/>} />
             <Route path='/postpage' element={<Postpage/>} />
           </Routes>
+          <Footer/>
           </LoginDetailsProvider>
        </BrowserRouter>
       
