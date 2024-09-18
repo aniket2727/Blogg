@@ -2,6 +2,11 @@ import React from 'react';
 import ButtonComponent from './ButtonComponent';
 
 const SlideComponent = () => {
+
+
+  const handleButtonClick=(item)=>{
+         
+  }
   return (
     <div className="flex justify-center items-center space-x-4 mt-1 bg-gray-500 p-5 rounded-md h-12"> 
     
