@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import GetAllpostdata from '../customHook/GetallPostdataApi';
 import ButtonComponent from './ButtonComponent';
+import PaginationForDisplayAllpost from './PaginationForDisplayAllpost';
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
@@ -55,6 +56,8 @@ const DisplayPostComponent = () => {
                     </div>
                 </div>
             ))}
+
+            <PaginationForDisplayAllpost allpostdata={posts}/>
         </div>
     );
 };

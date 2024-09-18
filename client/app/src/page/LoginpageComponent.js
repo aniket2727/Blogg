@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useId,useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import debounce from 'lodash/debounce';
 import Loginapis from '../customHook/LoginApi';
@@ -8,8 +9,12 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import LoginDetailsContext from '../contextApis/LoginDetailsContext';
+
 
 const MyLoginform = () => {
+  // Hooks inside the component
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,6 +22,11 @@ const MyLoginform = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
 
+  // Use context APIs
+  const { setUserEmail, setUserId ,userEmail,userId} = useContext(LoginDetailsContext);
+
+
+  // Use navigator
   const navigate = useNavigate();
 
   // Debounced function for form submission
@@ -31,6 +41,16 @@ const MyLoginform = () => {
     try {
       const result = await Loginapis({ email: data.email, password: data.password });
       console.log("The result of login API is:", result);
+
+      // Update context with user details
+      setUserEmail(result.user.email);
+      setUserId(result.user._id);
+      //print data
+
+      console.log("usecontext",userEmail);
+      console.log("usecontex",userId);
+     
+
       if (result.token) {
         localStorage.setItem('token', result.token);
       }
@@ -57,6 +77,10 @@ const MyLoginform = () => {
   const onSubmit = (data) => {
     handleLoginSubmit(data);
   };
+  useEffect(()=>{
+    console.log("Updated userEmail from context:", userEmail);
+    console.log("Updated userId from context:", userId);
+  },[userEmail,userId])
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -68,7 +92,9 @@ const MyLoginform = () => {
           <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <input
               {...register('email', {
                 required: 'Email is required',
@@ -84,7 +110,9 @@ const MyLoginform = () => {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
             <input
               {...register('password', {
                 required: 'Password is required',
@@ -111,22 +139,22 @@ const MyLoginform = () => {
         </form>
       ) : (
         <div className="fixed top-0 left-0 right-0 bottom-0 flex flex-col items-center justify-center z-50">
-        {/* Loader */}
-        {showLoader && (
-          <Box sx={{ width: '50%', mb: 2 }}>
-            <LinearProgress sx={{ width: '100%' }} />
-          </Box>
-        )}
-      
-        {/* Alert */}
-        {showAlert && (
-          <Stack sx={{ width: '80%' }} spacing={2} className="mt-4">
-            <Alert severity="success" sx={{ width: '100%',display:"flex" ,alignItems:'center',justifyContent:'center'}}>
-              {status}
-            </Alert>
-          </Stack>
-        )}
-      </div>
+          {/* Loader */}
+          {showLoader && (
+            <Box sx={{ width: '50%', mb: 2 }}>
+              <LinearProgress sx={{ width: '100%' }} />
+            </Box>
+          )}
+
+          {/* Alert */}
+          {showAlert && (
+            <Stack sx={{ width: '80%' }} spacing={2} className="mt-4">
+              <Alert severity="success" sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {status}
+              </Alert>
+            </Stack>
+          )}
+        </div>
       )}
     </div>
   );
