@@ -28,6 +28,7 @@ const NavbarComponent = () => {
     } else if (action === 'logout') {
       setUserEmail(''); // Clear user data on logout
       setUserId('');
+      localStorage.setItem('token',null);
       setLoginStatus(''); // Clear local login status
       console.log('Logged out');
     } else if (action === 'home') {
