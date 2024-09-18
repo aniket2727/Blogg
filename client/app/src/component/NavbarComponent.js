@@ -1,24 +1,36 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ButtonComponent from './ButtonComponent';
 import debounce from 'lodash/debounce';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
+import { useNavigate } from 'react-router-dom';
 
 const NavbarComponent = () => {
   // Use context APIs
   const { userEmail, setUserEmail, userId, setUserId } = useContext(LoginDetailsContext);
 
+  // Use navigate
+  const navigate = useNavigate();
+
   // Local state for login status
   const [loginstatus, setLoginStatus] = useState('');
 
-  // Debounced function for handling button click
-  const handleButtonClick = useCallback(
-    debounce(() => {
-      console.log("Button was clicked");
-    }, 300),
-    []
-  );
+  // Debounced navigation handler
+  const handleButtonClick = debounce((action) => {
+    console.log("Button was clicked");
+    
+    if (action === 'login') {
+      navigate('/login');
+    } else if (action === 'register') {
+      navigate('/signup');
+    } else if (action === 'logout') {
+      setUserEmail(''); // Clear user data on logout
+      setUserId('');
+      setLoginStatus(''); // Clear local login status
+      console.log('Logged out');
+    }
+  }, 300);
 
   // Update login status based on userId in context
   useEffect(() => {
@@ -39,14 +51,14 @@ const NavbarComponent = () => {
         {/* Show Login and Register buttons when not logged in */}
         {!loginstatus && (
           <>
-            <ButtonComponent buttonText="Login" backgroundColorprop="bg-red-500" onClick={handleButtonClick} />
-            <ButtonComponent buttonText="Register" backgroundColorprop="bg-red-500" onClick={handleButtonClick} />
+            <ButtonComponent buttonText="Login" backgroundColorprop="bg-red-500" onClick={() => handleButtonClick('login')} />
+            <ButtonComponent buttonText="Register" backgroundColorprop="bg-red-500" onClick={() => handleButtonClick('register')} />
           </>
         )}
 
         {/* Show Logout button when logged in */}
         {loginstatus && (
-          <ButtonComponent buttonText="Logout" backgroundColorprop="bg-red-500" onClick={handleButtonClick} />
+          <ButtonComponent buttonText="Logout" backgroundColorprop="bg-red-500" onClick={() => handleButtonClick('logout')} />
         )}
       </div>
     </div>
