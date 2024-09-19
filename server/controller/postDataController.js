@@ -85,6 +85,28 @@ const Getallpost = async (req, resp) => {
       console.error("Error occurred: ", error);
       resp.status(500).json({ message: "Internal server error" });
     }
-  };
+};
+
+const Getallpostbyemail=async(req,res)=>{
+
+    const { email } = req.body;
+
+    try {
+        const findallpostbyemail = await postdata.find({ email: email });
+        
+        if (findallpostbyemail.length > 0) {
+            res.status(200).json({ message: findallpostbyemail });
+        } else {
+            res.status(404).json({ message: "No post for this email" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: "An error occurred", error: error.message });
+    }
+    
+
+}
+
+
+
   
-module.exports = { Add_post_with_email ,Delete_post_by_id,Update_post_by_id,Getallpost};
+module.exports = { Add_post_with_email ,Delete_post_by_id,Update_post_by_id,Getallpost,Getallpostbyemail};
