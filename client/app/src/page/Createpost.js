@@ -2,13 +2,15 @@ import React, { useState, useEffect, useContext } from 'react';
 import ButtonComponent from '../component/ButtonComponent';
 import Savedpostwithemail from '../customHook/SavepostApi';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
-
-
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 
 const Createpost = () => {
   const [loginStatus, setLoginStatus] = useState(false);
   const [postContext, setPostContext] = useState('');
   const [getToken, setGetToken] = useState(null);
+  const [alertMessage, setAlertMessage] = useState(''); // State to store alert messages
+  const [alertSeverity, setAlertSeverity] = useState('error'); // State to manage alert type
 
   // Use context to get email from LoginDetailsContext
   const { userEmail } = useContext(LoginDetailsContext);
@@ -29,14 +31,16 @@ const Createpost = () => {
   const handleSubmit = async () => {
     // Validate post content
     if (!postContext) {
-      alert("Post content cannot be empty");
+      setAlertMessage("Please provide post content");
+      setAlertSeverity("error");
       return;
     }
 
     // Ensure user is authenticated
     if (!userEmail || !getToken) {
       console.log("User email:", userEmail);
-      alert("User is not authenticated");
+      setAlertMessage("Please log in");
+      setAlertSeverity("error");
       return;
     }
 
@@ -48,8 +52,15 @@ const Createpost = () => {
         token: getToken,
       });
       console.log("Result of saved post:", result);
+
+      // Clear the post content and show success alert
+      setPostContext('');
+      setAlertMessage("Post saved successfully");
+      setAlertSeverity("success");
     } catch (error) {
       console.error("Error saving post:", error);
+      setAlertMessage("Error saving post");
+      setAlertSeverity("error");
     }
   };
 
@@ -71,6 +82,13 @@ const Createpost = () => {
     <div className="flex flex-col items-center bg-gray-100 min-h-screen py-10">
       <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-xl">
         <h1 className="text-3xl font-bold mb-6 text-center">Create a Post</h1>
+
+        {alertMessage && (
+          <Stack sx={{ width: '100%' }} spacing={2}>
+            <Alert severity={alertSeverity}>{alertMessage}</Alert>
+          </Stack>
+        )}
+
         <textarea
           placeholder="Write your post here..."
           value={postContext}
