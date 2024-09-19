@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-const Savedpostwithemail = async ({ email, post, token }) => {
+const Savedpostwithemail = async ({ email, postContent, token }) => {
+
+  console.log("the upcoming values are",email,postContent,token);
   try {
     // Check if email, post, or token is missing
-    if (!email || !post) {
+    if (!email || !postContent) {
       throw new Error("Email or post data is missing");
     }
 
@@ -17,7 +19,7 @@ const Savedpostwithemail = async ({ email, post, token }) => {
     // Send a POST request to the API with token in headers
     const response = await axios.post(
       API_URL,
-      { email, post }, // Data to send in the body
+      { email, postContent}, // Data to send in the body
       {
         headers: {
           Authorization: `Bearer ${token}`, // Token in Authorization header

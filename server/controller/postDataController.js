@@ -2,7 +2,7 @@ const postdata = require('../database/schema/postDataSchema');
 const userInfo=require('../database/schema/userInfoSchema');
 
 const Add_post_with_email = async (req, resp) => {
-    const { email, postContent } = req.body;
+    const { email, postContent ,token} = req.body;
 
     try {
         // Check if the post exists for the given email
