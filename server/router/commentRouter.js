@@ -1,10 +1,12 @@
-const express=require('express');
-const router=express.Router();
-import { AddCommentOnPost,DeleteCommentOnPost } from '../controller/commentOnPost.Controllerjs';
-import { route } from './postDataRouter';
+const express = require('express');
+const router = express.Router();
 
+// Import the controllers
+const { AddCommentOnPost, DeleteCommentOnPost } = require('../controller/commentOnPostController');
 
-router.post('/addcomment',AddCommentOnPost);
-router.post('/deletecomment',DeleteCommentOnPost);
+// Define the routes
+router.post('/addcomment', AddCommentOnPost);
+router.post('/deletecomment', DeleteCommentOnPost);
 
-module.exports={router};
+// Export the router
+module.exports = router;
