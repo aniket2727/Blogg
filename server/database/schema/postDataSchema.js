@@ -9,7 +9,14 @@ const postSchema = new mongoose.Schema({
     postContent: {
         type: String,
         required: true
-    }
+    },
+    comments: [
+        {
+            text: { type: String, required: true }, // Comment text
+            author: { type: String }, // Author of the comment
+            timestamp: { type: Date, default: Date.now } // When the comment was added
+        }
+    ]
 });
 
 // Model for schema
