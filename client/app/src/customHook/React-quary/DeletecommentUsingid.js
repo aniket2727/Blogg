@@ -1,6 +1,6 @@
 const url = 'http://localhost:9009/c/deletecomment';
 
-const deleteCommentByIds = async ({ postid, commentid }) => {
+const DeleteCommentByIds = async ({ postid, commentid }) => {
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -22,4 +22,4 @@ const deleteCommentByIds = async ({ postid, commentid }) => {
   }
 };
 
-export { deleteCommentByIds };
+export { DeleteCommentByIds };
