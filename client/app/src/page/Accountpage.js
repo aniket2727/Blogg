@@ -3,6 +3,7 @@ import { FaUserCircle, FaSignInAlt, FaUsers } from 'react-icons/fa'; // React ic
 import ButtonComponent from '../component/ButtonComponent';
 import { useNavigate } from 'react-router-dom';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
+import { Getallpostbyemails } from '../customHook/GetpostByEmailApi';
 
 const Accountpage = () => {  
   const [token, setToken] = useState(false);
@@ -13,15 +14,29 @@ const Accountpage = () => {
   // Context API
   const { userEmail } = useContext(LoginDetailsContext);
 
+  // Check for token
   useEffect(() => {
     const localstoreResult = localStorage.getItem('token');
-    if (!localstoreResult || localstoreResult === 'null') {
-      setToken(false);
-    } else {
-      setToken(true);
-    }
+    setToken(localstoreResult && localstoreResult !== 'null');
   }, []);
 
+  // Fetch all posts by email
+  useEffect(() => {
+    const fetchPosts = async () => {
+      if (userEmail) {
+        try {
+          const result = await Getallpostbyemails({ email: userEmail });
+          console.log(result);
+        } catch (error) {
+          console.error("Error fetching posts:", error);
+        }
+      }
+    };
+    
+    fetchPosts();
+  }, [userEmail]);
+
+  // If user is not logged in
   if (!token) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200">
@@ -36,6 +51,7 @@ const Accountpage = () => {
     );
   }
 
+  // If user is logged in
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <FaUserCircle className="text-blue-500 text-6xl mb-4" />
@@ -53,6 +69,6 @@ const Accountpage = () => {
 
     </div>
   );
-}
+};
 
 export default Accountpage;

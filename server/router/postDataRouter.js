@@ -4,7 +4,7 @@ const {Add_post_with_email,Getallpost,Getallpostbyemail}=require('../controller/
 const middleware=require('../middleware/tokenAuthMiddleware')
 router.post('/addpost',Add_post_with_email);
 router.get('/getallpost',Getallpost);
-router.get('/epost',Getallpostbyemail);
+router.post('/epost',Getallpostbyemail);
 module.exports = router; 
 
 
