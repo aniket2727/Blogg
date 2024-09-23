@@ -14,7 +14,7 @@ app.use(cors()); // Fixed: Added parentheses
 const mongoURI = 'mongodb://127.0.0.1:27017/mydatabase';
 
 // Connect to MongoDB
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(mongoURI, { useNewUrlParser: true});
 
 const db = mongoose.connection;
 
