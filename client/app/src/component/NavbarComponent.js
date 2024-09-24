@@ -4,18 +4,34 @@ import React, { useState, useEffect, useContext } from 'react';
 import ButtonComponent from './ButtonComponent';
 import debounce from 'lodash/debounce';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
-import { useNavigate,useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearToken  } from '../features/token/tokenSlice'; // Adjust the path accordingly
+import { clearUserId } from '../features/userID/userIdSlice'; // Adjust the path accordingly
+import { selectToken } from '../features/token/tokenSlice';
+import { selectuserid } from '../features/userID/userIdSlice';
 
 const NavbarComponent = () => {
   // Use context APIs
-  const { userEmail, setUserEmail, userId, setUserId } = useContext(LoginDetailsContext);
+  const { setUserEmail } = useContext(LoginDetailsContext);
+
+  // Redux hooks
+  const dispatch = useDispatch();
+ 
+
+  // Get token and userId from Redux state
+  const token = useSelector(selectToken); // Fetch token from Redux
+  const userId = useSelector(selectuserid); // Fetch userId from Redux
+ 
+  console.log("navbar token",token);
+  console.log("navbar userid",userId)
 
   // Use navigate and location
   const navigate = useNavigate();
   const location = useLocation();
 
   // Local state for login status
-  const [loginstatus, setLoginStatus] = useState('');
+  const [loginStatus, setLoginStatus] = useState(false);
 
   // Debounced navigation handler
   const handleButtonClick = debounce((action) => {
@@ -26,24 +42,27 @@ const NavbarComponent = () => {
     } else if (action === 'register') {
       navigate('/signup');
     } else if (action === 'logout') {
-      setUserEmail(''); // Clear user data on logout
-      setUserId('');
-      localStorage.setItem('token',null);
-      setLoginStatus(''); // Clear local login status
+      // Clear user data on logout
+      setUserEmail(''); // Clear user email in context
+      dispatch(clearUserId()); // Clear user ID in Redux
+      dispatch(clearToken()); // Clear token in Redux
+      localStorage.removeItem('token'); // Clear token from local storage
+      setLoginStatus(false); // Clear local login status
       console.log('Logged out');
     } else if (action === 'home') {
       navigate('/home');
     }
   }, 300);
 
-  // Update login status based on userId in context
+  // Update login status based on the presence of userId and token
   useEffect(() => {
-    if (userId) {
-      setLoginStatus(userId); // Set login status if logged in
+    // Set login status based on the presence of userId and token
+    if (userId && token) {
+      setLoginStatus(true); // Set login status if logged in
     } else {
-      setLoginStatus(''); // Clear login status if logged out
+      setLoginStatus(false); // Clear login status if logged out
     }
-  }, [userId]);
+  }, [userId, token]);
 
   // Check if current route is not home
   const isNotHome = location.pathname !== '/home';
@@ -65,7 +84,7 @@ const NavbarComponent = () => {
         )}
 
         {/* Show Login and Register buttons when not logged in */}
-        {!loginstatus && (
+        {!loginStatus && (
           <>
             <ButtonComponent
               buttonText="Login"
@@ -81,7 +100,7 @@ const NavbarComponent = () => {
         )}
 
         {/* Show Logout button when logged in */}
-        {loginstatus && (
+        {loginStatus && (
           <ButtonComponent
             buttonText="Logout"
             backgroundColorprop="bg-red-500"
