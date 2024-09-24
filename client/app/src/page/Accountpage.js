@@ -5,22 +5,20 @@ import { useNavigate } from 'react-router-dom';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { Getallpostbyemails } from '../customHook/GetpostByEmailApi';
 import Postbyuser from '../component/PostByuser';
+import {  useSelector } from 'react-redux';
+import { selectToken } from '../features/token/tokenSlice'; // Adjust the path accordingly
 
 const Accountpage = () => {
-  const [token, setToken] = useState(false);
   const [data, setdata] = useState('');
-
+  
   // Navigator
   const navigate = useNavigate();
 
   // Context API
   const { userEmail } = useContext(LoginDetailsContext);
 
-  // Check for token
-  useEffect(() => {
-    const localstoreResult = localStorage.getItem('token');
-    setToken(localstoreResult && localstoreResult !== 'null');
-  }, []);
+  // Redux token
+  const token = useSelector(selectToken); // Fetch token from Redux
 
   // Fetch all posts by email
   useEffect(() => {
@@ -67,7 +65,6 @@ const Accountpage = () => {
           className="bg-green-500 text-white px-6 py-2 mb-4 rounded-full hover:bg-green-600 transition duration-300 flex items-center"
           icon={<FaUsers className="mr-2" />} // Add an icon to the button
         />
-
       </div>
       <Postbyuser data={data} />
     </div>
