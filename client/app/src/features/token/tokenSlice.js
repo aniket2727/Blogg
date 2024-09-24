@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const tokenSlice = createSlice({
   name: 'token',
-  initialState: null, // Adjust the initial state as per your requirement
+  initialState: '', // Adjust the initial state as per your requirement
   reducers: {
     setToken: (state, action) => action.payload,
     clearToken: () => null,

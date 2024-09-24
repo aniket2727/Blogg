@@ -7,6 +7,8 @@ import { Getallpostbyemails } from '../customHook/GetpostByEmailApi';
 import Postbyuser from '../component/PostByuser';
 import {  useSelector } from 'react-redux';
 import { selectToken } from '../features/token/tokenSlice'; // Adjust the path accordingly
+import { selectuserid } from '../features/userID/userIdSlice';
+
 
 const Accountpage = () => {
   const [data, setdata] = useState('');
@@ -19,6 +21,11 @@ const Accountpage = () => {
 
   // Redux token
   const token = useSelector(selectToken); // Fetch token from Redux
+  const userid=useSelector(selectuserid);
+
+
+  console.log("token in account",token);
+  console.log("userid in account",userid);
 
   // Fetch all posts by email
   useEffect(() => {

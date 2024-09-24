@@ -1,21 +1,17 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useCallback, useId,useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import debounce from 'lodash/debounce';
 import Loginapis from '../customHook/LoginApi';
-import Alert from '@mui/material/Alert';
-import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
 import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
-import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { setToken,selectToken } from '../features/token/tokenSlice';
-import { setUserId, } from '../features/userID/userIdSlice';
-import { selectuserid } from '../features/userID/userIdSlice';
-
+import { setToken } from '../features/token/tokenSlice';
+import { setUserId, selectuserid } from '../features/userID/userIdSlice';
+import LoginDetailsContext from '../contextApis/LoginDetailsContext';
+import Alert from '@mui/material/Alert';
+import LinearProgress from '@mui/material/LinearProgress';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 
 const MyLoginform = () => {
   // Hooks inside the component
@@ -27,15 +23,15 @@ const MyLoginform = () => {
   const [showLoader, setShowLoader] = useState(false);
 
   // Use context APIs
-  const { setUserEmail, setUserId ,userEmail,userId} = useContext(LoginDetailsContext);
-
+  const { setUserEmail } = useContext(LoginDetailsContext);
 
   // Use navigator
   const navigate = useNavigate();
 
-  //redux toekn
+  // Redux state and dispatch
   const dispatch = useDispatch();
-  //const token = useSelector(selectToken);
+  const userId = useSelector(selectuserid); // Select userId from Redux state
+  const token = useSelector((state) => state.token.token); // Select token from Redux state
 
   // Debounced function for form submission
   const handleLoginSubmit = useCallback(debounce(async (data) => {
@@ -52,21 +48,17 @@ const MyLoginform = () => {
 
       // Update context with user details
       setUserEmail(result.user.email);
-      setUserId(result.user._id);
-      //print data
-
-      console.log("usecontext",userEmail);
-      console.log("usecontex",userId);
-     
+      
+      // Dispatch userId to Redux
+      if (result.user._id) {
+        dispatch(setUserId(result.user._id));
+      }
 
       if (result.token) {
         localStorage.setItem('token', result.token);
         dispatch(setToken(result.token));
       }
 
-      if(result.user._id){
-        dispatch(setUserId(result.user._id))
-      }
       setStatus("Login successful");
       setShowAlert(true);
       reset(); // Clear form fields after successful login
@@ -92,11 +84,12 @@ const MyLoginform = () => {
   const onSubmit = (data) => {
     handleLoginSubmit(data);
   };
-  
-  useEffect(()=>{
-    console.log("Updated userEmail from context:", userEmail);
-    console.log("Updated userId from context:", userId);
-  },[userEmail,userId])
+
+  useEffect(() => {
+    // Log userId and token from Redux state
+    console.log("Updated userId from Redux:", userId);
+    console.log("Updated token from Redux:", token);
+  }, [userId, token]); // Log whenever userId or token from Redux updates
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
