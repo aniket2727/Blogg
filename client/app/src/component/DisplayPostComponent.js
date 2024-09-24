@@ -1,30 +1,24 @@
-/* eslint-disable no-unused-vars */
 import React, { useEffect, useState, useContext } from 'react';
 import GetAllpostdata from '../customHook/GetallPostdataApi';
 import ButtonComponent from './ButtonComponent';
 import PaginationForDisplayAllpost from './PaginationForDisplayAllpost';
 import { AddcommentByid } from '../customHook/AddCommentbyid';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
-
-// Importing the arrow icon from react-icons
-import { FiArrowRight } from 'react-icons/fi';
+import { FiSend, FiMessageSquare, FiTrash } from 'react-icons/fi'; // Importing icons
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [comments, setComments] = useState({});
+    const [visibleComments, setVisibleComments] = useState({}); // Track visibility of comments for each post
 
-    const [comments, setComments] = useState({}); // Store comments for each post
-
-    // useContext to get user email from context
     const { userEmail } = useContext(LoginDetailsContext);
 
+    // Handle adding comment
     const handleSend = async (item_post_id) => {
         try {
-            // Get the comment for the specific post
             const newComment = comments[item_post_id];
-
-            // Call AddcommentByid function
             const result = await AddcommentByid({ postid: item_post_id, newpostcomment: newComment, author: userEmail });
             console.log('Comment added:', result);
 
@@ -43,6 +37,15 @@ const DisplayPostComponent = () => {
         }));
     };
 
+    // Toggle visibility of comments for a specific post
+    const handleSeeComment = (postId) => {
+        setVisibleComments((prevVisibleComments) => ({
+            ...prevVisibleComments,
+            [postId]: !prevVisibleComments[postId],
+        }));
+    };
+
+    // Fetch post data
     const callApisforPostData = async () => {
         try {
             const result = await GetAllpostdata();
@@ -84,17 +87,46 @@ const DisplayPostComponent = () => {
                         <p className="text-gray-700">{item.postContent}</p>
                         {item.postContent.length < 50 && <div className="h-12 w-full"></div>}
                     </div>
+
                     <input
-                        placeholder='Comment'
-                        value={comments[item._id] || ''} // Use the comment specific to the post
-                        onChange={(e) => handleCommentChange(e, item._id)} // Update comment for this specific post
+                        placeholder="Comment"
+                        value={comments[item._id] || ''}
+                        onChange={(e) => handleCommentChange(e, item._id)}
                         className="border p-2 w-full mb-2"
                     />
+
+                    {/* Display comments toggle */}
                     <button
-                        onClick={() => handleSend(item._id)} // Send the comment for the specific post
+                        onClick={() => handleSeeComment(item._id)}
                         className="bg-blue-500 text-white px-4 py-2 rounded flex items-center"
                     >
-                        Send <FiArrowRight className="ml-2" /> {/* Adding the arrow icon */}
+                        <FiMessageSquare className="mr-2" />
+                        {visibleComments[item._id] ? 'Hide Comments' : 'See Comments'}
+                    </button>
+
+                    {/* Display the comments if visible */}
+                    {visibleComments[item._id] && item.comments && item.comments.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                            {item.comments.map((comment, commentIndex) => (
+                                <div key={commentIndex} className="flex justify-between items-center bg-gray-100 p-2 rounded">
+                                    <div>
+                                        <p className="font-semibold">{comment.author}</p>
+                                        <p>{comment.text}</p>
+                                    </div>
+                                    <button className="text-red-500">
+                                        <FiTrash />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Send comment button */}
+                    <button
+                        onClick={() => handleSend(item._id)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded flex items-center mt-2"
+                    >
+                        Send <FiSend className="ml-2" />
                     </button>
                 </div>
             ))}
