@@ -13,6 +13,9 @@ import { useContext } from 'react';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { setToken,selectToken } from '../features/token/tokenSlice';
+import { setid,selectuserid } from '../features/userID/userIdSlice';
+
+
 
 const MyLoginform = () => {
   // Hooks inside the component
@@ -59,6 +62,10 @@ const MyLoginform = () => {
       if (result.token) {
         localStorage.setItem('token', result.token);
         dispatch(setToken(result.token));
+      }
+
+      if(result.user._id){
+        dispatch(setid(result.user._id))
       }
       setStatus("Login successful");
       setShowAlert(true);
