@@ -5,6 +5,7 @@ import PaginationForDisplayAllpost from './PaginationForDisplayAllpost';
 import { AddcommentByid } from '../customHook/AddCommentbyid';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { FiSend, FiMessageSquare, FiTrash } from 'react-icons/fi'; // Importing icons
+import { DeleteCommentByIds } from '../customHook/React-quary/DeletecommentUsingid';
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
@@ -56,6 +57,28 @@ const DisplayPostComponent = () => {
             console.error("The error is:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Delete comment
+    const handleDeleteCommentByid = async (postid, commentid) => {
+        try {
+            const response = await DeleteCommentByIds({ postid, commentid });
+            console.log(response);
+
+            // Update the posts state to remove the deleted comment
+            setPosts((prevPosts) =>
+                prevPosts.map((post) =>
+                    post._id === postid
+                        ? {
+                            ...post,
+                            comments: post.comments.filter((comment) => comment._id !== commentid),
+                        }
+                        : post
+                )
+            );
+        } catch (error) {
+            console.error("Error deleting comment:", error);
         }
     };
 
@@ -113,7 +136,7 @@ const DisplayPostComponent = () => {
                                         <p className="font-semibold">{comment.author}</p>
                                         <p>{comment.text}</p>
                                     </div>
-                                    <button className="text-red-500">
+                                    <button onClick={() => handleDeleteCommentByid(item._id, comment._id)} className="text-red-500">
                                         <FiTrash />
                                     </button>
                                 </div>
