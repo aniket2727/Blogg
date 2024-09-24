@@ -70,11 +70,13 @@ const MyLoginform = () => {
         setShowAlert(false);
         navigate('/home'); // Redirect to the home page or desired path
       }, 3000); // Show for 3 seconds
+
     } catch (error) {
       console.log("Error:", error);
       setStatus(error.message || "Failed to login");
       setError(true);
       setShowLoader(false);
+
     } finally {
       setLoading(false);
     }
@@ -83,6 +85,7 @@ const MyLoginform = () => {
   const onSubmit = (data) => {
     handleLoginSubmit(data);
   };
+  
   useEffect(()=>{
     console.log("Updated userEmail from context:", userEmail);
     console.log("Updated userId from context:", userId);
