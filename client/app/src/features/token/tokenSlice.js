@@ -1,24 +1,15 @@
-// src/features/token/tokenSlice.js
-import { createSlice } from "@reduxjs/toolkit";
+// tokenSlice.js
+import { createSlice } from '@reduxjs/toolkit';
 
 const tokenSlice = createSlice({
   name: 'token',
-  initialState: {
-    token: '',
-  },
+  initialState: null, // Adjust the initial state as per your requirement
   reducers: {
-    setToken(state, action) {
-      state.token = action.payload;
-    },
-    clearToken(state) {
-      state.token = '';
-    },
+    setToken: (state, action) => action.payload,
+    clearToken: () => null,
   },
 });
 
 export const { setToken, clearToken } = tokenSlice.actions;
-
-// Optional: Create a selector to get the token
-export const selectToken = (state) => state.token.token;
-
+export const selectToken = (state) => state.token;
 export default tokenSlice.reducer;

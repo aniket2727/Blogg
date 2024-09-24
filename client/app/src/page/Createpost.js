@@ -1,32 +1,39 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useContext } from 'react';
+import { useDispatch, useSelector } from 'react-redux'; // Import useSelector to access Redux state
 import ButtonComponent from '../component/ButtonComponent';
 import Savedpostwithemail from '../customHook/SavepostApi';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import { selectToken } from '../features/token/tokenSlice'; // Selector to get token
+import { selectuserid } from '../features/userID/userIdSlice'; // Selector to get userId
 
 const Createpost = () => {
   const [loginStatus, setLoginStatus] = useState(false);
   const [postContext, setPostContext] = useState('');
-  const [getToken, setGetToken] = useState(null);
   const [alertMessage, setAlertMessage] = useState(''); // State to store alert messages
   const [alertSeverity, setAlertSeverity] = useState('error'); // State to manage alert type
+
+  // Get token and userId from Redux state
+  const token = useSelector(selectToken); // Fetch token from Redux
+  const userId = useSelector(selectuserid); // Fetch userId from Redux
+
+  console.log("the value of redux token is ",token);
 
   // Use context to get email from LoginDetailsContext
   const { userEmail } = useContext(LoginDetailsContext);
 
-  // Fetch token from localStorage and set login status
+  // Set login status based on token availability in Redux
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    console.log("Token status:", token);
+    console.log("Redux Token status:", token);
 
     if (token && token !== 'null') {
-      setGetToken(token);
       setLoginStatus(true);
     } else {
       setLoginStatus(false);
     }
-  }, []);
+  }, [token]); // Re-run effect whenever token changes
 
   const handleSubmit = async () => {
     // Validate post content
@@ -37,7 +44,7 @@ const Createpost = () => {
     }
 
     // Ensure user is authenticated
-    if (!userEmail || !getToken) {
+    if (!userEmail || !token) {
       console.log("User email:", userEmail);
       setAlertMessage("Please log in");
       setAlertSeverity("error");
@@ -49,7 +56,7 @@ const Createpost = () => {
       const result = await Savedpostwithemail({
         email: userEmail,
         postContent: postContext,
-        token: getToken,
+        token: token, // Use token from Redux
       });
       console.log("Result of saved post:", result);
 

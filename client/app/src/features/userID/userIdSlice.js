@@ -1,24 +1,15 @@
-import { createSlice } from "@reduxjs/toolkit";
+// userIdSlice.js
+import { createSlice } from '@reduxjs/toolkit';
 
 const userIdSlice = createSlice({
-    name: "userId",
-    initialState: {
-        userId: ''
-    },
-    reducers: {
-        setid(state, action) {
-            state.userId = action.payload;
-        },
-        clearid(state) {
-            state.userId = '';
-        },
-    },
+  name: 'userId',
+  initialState: null, // Adjust the initial state as per your requirement
+  reducers: {
+    setUserId: (state, action) => action.payload,
+    clearUserId: () => null,
+  },
 });
 
-// Corrected action names
-export const { setid, clearid } = userIdSlice.actions;
-
-// Optional: Create a selector to get the user ID
-export const selectuserid = (state) => state.userId.userId;
-
+export const { setUserId, clearUserId } = userIdSlice.actions;
+export const selectuserid = (state) => state.userId;
 export default userIdSlice.reducer;

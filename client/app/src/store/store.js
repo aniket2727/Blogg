@@ -1,12 +1,16 @@
 // src/store/store.js
+// store.js
 import { configureStore } from '@reduxjs/toolkit';
-import emailReducer from '../features/email/emailSlice';
-import tokenReducer from '../features/token/tokenSlice';
-import userIdReducer from '../features/userID/userIdSlice';
-export const store = configureStore({
+import tokenSlice from '../features/token/tokenSlice';
+import userIdSlice from '../features/userID/userIdSlice';
+import emailSlice from '../features/email/emailSlice';
+
+const store = configureStore({
   reducer: {
-    email: emailReducer,
-    token: tokenReducer,
-    userId:userIdReducer,
+    token: tokenSlice,
+    userId: userIdSlice,
+    useremail:emailSlice,
   },
 });
+
+export default store;
