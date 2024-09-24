@@ -11,7 +11,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { setToken,selectToken } from '../features/token/tokenSlice';
 
 const MyLoginform = () => {
   // Hooks inside the component
@@ -28,6 +29,10 @@ const MyLoginform = () => {
 
   // Use navigator
   const navigate = useNavigate();
+
+  //redux toekn
+  const dispatch = useDispatch();
+  //const token = useSelector(selectToken);
 
   // Debounced function for form submission
   const handleLoginSubmit = useCallback(debounce(async (data) => {
@@ -53,6 +58,7 @@ const MyLoginform = () => {
 
       if (result.token) {
         localStorage.setItem('token', result.token);
+        dispatch(setToken(result.token));
       }
       setStatus("Login successful");
       setShowAlert(true);
