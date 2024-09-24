@@ -6,6 +6,7 @@ import { AddcommentByid } from '../customHook/AddCommentbyid';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { FiSend, FiMessageSquare, FiTrash } from 'react-icons/fi'; // Importing icons
 import { DeleteCommentByIds } from '../customHook/React-quary/DeletecommentUsingid';
+import { debounce } from 'lodash'; // Importing debounce from lodash
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
@@ -29,6 +30,9 @@ const DisplayPostComponent = () => {
             console.error("Error adding comment:", error);
         }
     };
+
+    // Debounce the handleSend function
+    const debouncedHandleSend = debounce(handleSend, 300); // Adjust the delay as needed
 
     // Update the comment for the specific post in the state
     const handleCommentChange = (e, item_post_id) => {
@@ -60,27 +64,14 @@ const DisplayPostComponent = () => {
         }
     };
 
-    // Delete comment
+    // delete comment
     const handleDeleteCommentByid = async (postid, commentid) => {
-        try {
-            const response = await DeleteCommentByIds({ postid, commentid });
-            console.log(response);
-
-            // Update the posts state to remove the deleted comment
-            setPosts((prevPosts) =>
-                prevPosts.map((post) =>
-                    post._id === postid
-                        ? {
-                            ...post,
-                            comments: post.comments.filter((comment) => comment._id !== commentid),
-                        }
-                        : post
-                )
-            );
-        } catch (error) {
-            console.error("Error deleting comment:", error);
-        }
+        const response = await DeleteCommentByIds({ postid: postid, commentid: commentid });
+        console.log(response);
     };
+
+    // Debounce the delete comment function
+    const debouncedHandleDeleteCommentByid = debounce(handleDeleteCommentByid, 300); // Adjust the delay as needed
 
     useEffect(() => {
         callApisforPostData();
@@ -136,7 +127,7 @@ const DisplayPostComponent = () => {
                                         <p className="font-semibold">{comment.author}</p>
                                         <p>{comment.text}</p>
                                     </div>
-                                    <button onClick={() => handleDeleteCommentByid(item._id, comment._id)} className="text-red-500">
+                                    <button onClick={() => debouncedHandleDeleteCommentByid(item._id, comment._id)} className="text-red-500">
                                         <FiTrash />
                                     </button>
                                 </div>
@@ -146,7 +137,7 @@ const DisplayPostComponent = () => {
 
                     {/* Send comment button */}
                     <button
-                        onClick={() => handleSend(item._id)}
+                        onClick={() => debouncedHandleSend(item._id)}
                         className="bg-blue-500 text-white px-4 py-2 rounded flex items-center mt-2"
                     >
                         Send <FiSend className="ml-2" />
