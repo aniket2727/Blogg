@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { LoginDetailsProvider } from './contextApis/LoginDetailsContext';
 import NavbarComponent from './component/NavbarComponent';
 import Footer from './component/FooterComponent';
+import LazyLoadErrorBoundary from './helper/Errorboundry';
 
 // Lazy-loaded components
 const MyLoginform = lazy(() => import('./page/LoginpageComponent'));
@@ -43,21 +44,23 @@ const App = () => {
         <LoginDetailsProvider>
           <NavbarComponent />
 
-          {/* Wrap Routes with Suspense for lazy loading */}
-          <Suspense fallback={<LoaderComponent />}>
-            <Routes>
-              <Route path='/login' element={<MyLoginform />} />
-              <Route path='/signup' element={<RegisterFormPageComponent />} />
-              <Route path='/email' element={<EmailManager />} />
-              <Route path='/home' element={<HomepageComponent />} />
-              <Route path='/account' element={<Accountpage />} />
-              <Route path='/createpost' element={<Createpost />} />
-              <Route path='/postpage' element={<Postpage />} />
+          {/* Wrap Routes with LazyLoadErrorBoundary and Suspense for lazy loading */}
+          <LazyLoadErrorBoundary>
+            <Suspense fallback={<LoaderComponent />}>
+              <Routes>
+                <Route path='/login' element={<MyLoginform />} />
+                <Route path='/signup' element={<RegisterFormPageComponent />} />
+                <Route path='/email' element={<EmailManager />} />
+                <Route path='/home' element={<HomepageComponent />} />
+                <Route path='/account' element={<Accountpage />} />
+                <Route path='/createpost' element={<Createpost />} />
+                <Route path='/postpage' element={<Postpage />} />
 
-              {/* Catch-all route to redirect unknown URLs to the home page */}
-              <Route path='*' element={<Navigate to="/home" />} />
-            </Routes>
-          </Suspense>
+                {/* Catch-all route to redirect unknown URLs to the home page */}
+                <Route path='*' element={<Navigate to="/home" />} />
+              </Routes>
+            </Suspense>
+          </LazyLoadErrorBoundary>
 
           <Footer />
         </LoginDetailsProvider>
