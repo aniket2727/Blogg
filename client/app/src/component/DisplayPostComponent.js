@@ -10,6 +10,8 @@ import { DeleteCommentByIds } from '../customHook/React-quary/DeletecommentUsing
 import debounce from 'lodash/debounce';
 import { useSelector } from 'react-redux';
 import { selectuserid } from '../features/userID/userIdSlice';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
@@ -17,10 +19,12 @@ const DisplayPostComponent = () => {
     const [loading, setLoading] = useState(true);
     const [comments, setComments] = useState({});
     const [visibleComments, setVisibleComments] = useState({});
+    const [loginError, setLoginError] = useState(false); // Updated to show login error when trying to add a comment without login
 
     const { userEmail } = useContext(LoginDetailsContext);
-    const userid = useSelector(selectuserid);
+    const userid = useSelector(selectuserid); // Get userid from Redux
 
+    // Fetch posts data
     const callApisforPostData = async () => {
         try {
             const result = await GetAllpostdata();
@@ -40,6 +44,11 @@ const DisplayPostComponent = () => {
 
     // Handle adding comment
     const handleSend = async (item_post_id) => {
+        if (!userid) {
+            setLoginError(true); // Set error if user not logged in
+            return; // Stop function execution if not logged in
+        }
+
         try {
             const newComment = comments[item_post_id];
             const result = await AddcommentByid({
@@ -50,13 +59,13 @@ const DisplayPostComponent = () => {
             });
             console.log('Comment added:', result);
             setComments((prevComments) => ({ ...prevComments, [item_post_id]: '' })); // Clear comment input
-            callApisforPostData();
+            callApisforPostData(); // Reload posts to show the new comment
         } catch (error) {
             console.error("Error adding comment:", error);
         }
     };
 
-    // Debounce handleSend function
+    // Debounce handleSend function to prevent rapid submissions
     const debouncedHandleSend = useCallback(debounce(handleSend, 300), [comments]);
 
     // Handle comment input change
@@ -67,6 +76,7 @@ const DisplayPostComponent = () => {
         }));
     };
 
+    // Toggle visibility of comments for a specific post
     const handleSeeComment = (postId) => {
         setVisibleComments((prevVisibleComments) => ({
             ...prevVisibleComments,
@@ -74,6 +84,7 @@ const DisplayPostComponent = () => {
         }));
     };
 
+    // Handle deleting comment
     const handleDeleteCommentByid = async (postid, commentid, autherid) => {
         try {
             if (autherid === userid) {
@@ -89,9 +100,13 @@ const DisplayPostComponent = () => {
     // Debounce handleDeleteCommentByid function
     const debouncedHandleDeleteCommentByid = useCallback(debounce(handleDeleteCommentByid, 300), [userid]);
 
+    // Show loading state
     if (loading) return <p className="font-bold text-green-600">Loading...</p>;
+
+    // Show error if data fetching fails
     if (error) return <p className="font-bold text-red-600">{error}</p>;
 
+    // Show message when there are no posts available
     if (posts.length === 0) {
         return (
             <div className="flex items-center justify-center p-4">
@@ -113,6 +128,7 @@ const DisplayPostComponent = () => {
                         {item.postContent.length < 50 && <div className="h-12 w-full"></div>}
                     </div>
 
+                    {/* Input for comments */}
                     <input
                         placeholder="Comment"
                         value={comments[item._id] || ''}
@@ -120,39 +136,54 @@ const DisplayPostComponent = () => {
                         className="border p-2 w-full mb-2"
                     />
 
-                    <button
-                        onClick={() => handleSeeComment(item._id)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded flex items-center"
-                    >
-                        <FiMessageSquare className="mr-2" />
-                        {visibleComments[item._id] ? 'Hide Comments' : 'See Comments'}
-                    </button>
-
-                    {visibleComments[item._id] && item.comments && item.comments.length > 0 && (
-                        <div className="mt-2 space-y-2">
-                            {item.comments.map((comment) => (
-                                <div key={comment._id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
-                                    <div>
-                                        <p className="font-semibold">{comment.author}</p>
-                                        <p>{comment.text}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => debouncedHandleDeleteCommentByid(item._id, comment._id, comment.autherid)}
-                                        className="text-red-500"
-                                    >
-                                        <FiTrash />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                    {/* Display error if trying to comment without login */}
+                    {loginError && (
+                        <Stack sx={{ width: '100%' }} spacing={2}>
+                            <Alert severity="error">Please log in to add a comment</Alert>
+                        </Stack>
                     )}
 
-                    <button
-                        onClick={() => debouncedHandleSend(item._id)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded flex items-center mt-2"
-                    >
-                        Send <FiSend className="ml-2" />
-                    </button>
+                    <div className="flex space-x-4 items-center">
+                        {/* Button to toggle comments */}
+                        <button
+                            onClick={() => handleSeeComment(item._id)}
+                            className="bg-blue-500 text-white p-2 rounded"
+                        >
+                            <FiMessageSquare />
+                        </button>
+
+                        {/* Button to send comment */}
+                        <button
+                            onClick={() => debouncedHandleSend(item._id)}
+                            className="bg-blue-500 text-white p-2 rounded"
+                        >
+                            <FiSend />
+                        </button>
+
+                        {/* Show comments when toggled */}
+                        {visibleComments[item._id] && item.comments && item.comments.length > 0 && (
+                            <div className="mt-2 space-y-2 w-full">
+                                {item.comments.map((comment) => (
+                                    <div key={comment._id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
+                                        <div>
+                                            <p className="font-semibold">{comment.author}</p>
+                                            <p>{comment.text}</p>
+                                        </div>
+
+                                        {/* Allow delete if the comment author is the logged-in user */}
+                                        {comment.autherid === userid && (
+                                            <button
+                                                onClick={() => debouncedHandleDeleteCommentByid(item._id, comment._id, comment.autherid)}
+                                                className="text-red-500 p-2"
+                                            >
+                                                <FiTrash />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             ))}
 
