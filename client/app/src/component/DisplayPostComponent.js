@@ -19,7 +19,8 @@ const DisplayPostComponent = () => {
     const [loading, setLoading] = useState(true);
     const [comments, setComments] = useState({});
     const [visibleComments, setVisibleComments] = useState({});
-    const [loginError, setLoginError] = useState(false); // Updated to show login error when trying to add a comment without login
+    const [loginErrorPostId, setLoginErrorPostId] = useState(null); // Tracks post ID for login error
+    const [postid, setpostid] = useState([]);
 
     const { userEmail } = useContext(LoginDetailsContext);
     const userid = useSelector(selectuserid); // Get userid from Redux
@@ -45,9 +46,11 @@ const DisplayPostComponent = () => {
     // Handle adding comment
     const handleSend = async (item_post_id) => {
         if (!userid) {
-            setLoginError(true); // Set error if user not logged in
+            setLoginErrorPostId(item_post_id); // Set error for the specific post
             return; // Stop function execution if not logged in
         }
+
+        setpostid([...postid, item_post_id]); // Spread the previous post ids
 
         try {
             const newComment = comments[item_post_id];
@@ -60,6 +63,7 @@ const DisplayPostComponent = () => {
             console.log('Comment added:', result);
             setComments((prevComments) => ({ ...prevComments, [item_post_id]: '' })); // Clear comment input
             callApisforPostData(); // Reload posts to show the new comment
+            setLoginErrorPostId(null); // Clear error if comment added successfully
         } catch (error) {
             console.error("Error adding comment:", error);
         }
@@ -153,8 +157,8 @@ const DisplayPostComponent = () => {
                         className="border p-2 w-full mb-2"
                     />
     
-                    {/* Display error if trying to comment without login */}
-                    {loginError && (
+                    {/* Display error if trying to comment without login, but only for the current post */}
+                    {loginErrorPostId === item._id && (
                         <Stack sx={{ width: '100%' }} spacing={2}>
                             <Alert severity="error">Please log in to add a comment</Alert>
                         </Stack>
@@ -189,7 +193,6 @@ const DisplayPostComponent = () => {
             <PaginationForDisplayAllpost allpostdata={posts} />
         </div>
     );
-    };
-    
-    export default DisplayPostComponent;
-    
+};
+
+export default DisplayPostComponent;
