@@ -16,7 +16,7 @@ const logger = winston.createLogger({
 });
 
 const AddCommentOnPost = async (req, res) => {
-    const { postid, newpostcomment, author } = req.body;
+    const { postid, newpostcomment, author ,autherid} = req.body;
 
     try {
         // Find the post by its ID
@@ -26,7 +26,8 @@ const AddCommentOnPost = async (req, res) => {
             // Create a new comment object
             const comment = {
                 text: newpostcomment,
-                author: author || 'Anonymous' // Default to 'Anonymous' if no author is provided
+                author: author || 'Anonymous' ,// Default to 'Anonymous' if no author is provided,
+                autherid:autherid,
             };
 
             // Push the new comment to the comments array
