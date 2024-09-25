@@ -38,7 +38,7 @@ app.use('/app', add_user_router);
 app.use('/app1', login_user_router);
 app.use('/app/password', update_user_password);
 app.use('/app/post', add_postdata_router);
-app.use('/app', delete_post_by_id_router);
+app.use('/d', delete_post_by_id_router);
 app.use('/app',getallpost);
 app.use('/post',postbyemail);
 app.use('/c',postcomment);
