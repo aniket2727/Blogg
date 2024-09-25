@@ -5,6 +5,6 @@ const validation = require('../middleware/tokenAuthMiddleware');
 const  {Delete_post_by_id}  = require('../controller/postDataController');
 
 // Applying validation middleware if needed
-router.post('/deletepost',validation, Delete_post_by_id);
+router.post('/deletepost', Delete_post_by_id);
 
 module.exports = router;
