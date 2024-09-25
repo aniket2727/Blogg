@@ -6,7 +6,7 @@ const tokenSlice = createSlice({
   initialState: '', // Adjust the initial state as per your requirement
   reducers: {
     setToken: (state, action) => action.payload,
-    clearToken: () => null,
+    clearToken: () => '',
   },
 });
 
