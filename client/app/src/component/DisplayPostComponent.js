@@ -6,7 +6,7 @@ import { AddcommentByid } from '../customHook/AddCommentbyid';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { FiSend, FiMessageSquare, FiTrash } from 'react-icons/fi'; // Importing icons
 import { DeleteCommentByIds } from '../customHook/React-quary/DeletecommentUsingid';
-import { debounce } from 'lodash'; // Importing debounce from lodash
+import debounce from 'lodash/debounce'; // Corrected import statement
 import { useSelector } from 'react-redux';
 import { selectuserid } from '../features/userID/userIdSlice';
 
@@ -16,31 +16,25 @@ const DisplayPostComponent = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [comments, setComments] = useState({});
-    const [visibleComments, setVisibleComments] = useState({}); // Track visibility of comments for each post
+    const [visibleComments, setVisibleComments] = useState({});
 
     const { userEmail } = useContext(LoginDetailsContext);
-
-    // redux ids
-    const autherid=useSelector(selectuserid);
+    const userid = useSelector(selectuserid);
 
     // Handle adding comment
     const handleSend = async (item_post_id) => {
         try {
             const newComment = comments[item_post_id];
-            const result = await AddcommentByid({ postid: item_post_id, newpostcomment: newComment, author: userEmail,autherid :autherid });
+            const result = await AddcommentByid({ postid: item_post_id, newpostcomment: newComment, author: userEmail, autherid: userid });
             console.log('Comment added:', result);
-
-            // Clear the comment input for the post after sending
-            setComments((prevComments) => ({ ...prevComments, [item_post_id]: '' }));
+            setComments((prevComments) => ({ ...prevComments, [item_post_id]: '' })); // Clear comment input
         } catch (error) {
             console.error("Error adding comment:", error);
         }
     };
 
-    // Debounce the handleSend function
-    const debouncedHandleSend = debounce(handleSend, 300); // Adjust the delay as needed
+    const debouncedHandleSend = debounce(handleSend, 300);
 
-    // Update the comment for the specific post in the state
     const handleCommentChange = (e, item_post_id) => {
         setComments((prevComments) => ({
             ...prevComments,
@@ -48,7 +42,6 @@ const DisplayPostComponent = () => {
         }));
     };
 
-    // Toggle visibility of comments for a specific post
     const handleSeeComment = (postId) => {
         setVisibleComments((prevVisibleComments) => ({
             ...prevVisibleComments,
@@ -56,7 +49,6 @@ const DisplayPostComponent = () => {
         }));
     };
 
-    // Fetch post data
     const callApisforPostData = async () => {
         try {
             const result = await GetAllpostdata();
@@ -70,21 +62,20 @@ const DisplayPostComponent = () => {
         }
     };
 
-    // delete comment
-    const handleDeleteCommentByid = async (postid, commentid) => {
-        const response = await DeleteCommentByIds({ postid: postid, commentid: commentid });
-        console.log(response);
+    const handleDeleteCommentByid = async (postid, commentid, autherid) => {
+        if (autherid === userid) {
+            const response = await DeleteCommentByIds({ postid, commentid });
+            console.log(response);
+        }
     };
 
-    // Debounce the delete comment function
-    const debouncedHandleDeleteCommentByid = debounce(handleDeleteCommentByid, 300); // Adjust the delay as needed
+    const debouncedHandleDeleteCommentByid = debounce(handleDeleteCommentByid, 300);
 
     useEffect(() => {
         callApisforPostData();
     }, []);
 
     if (loading) return <p className="font-bold text-green-600">Loading...</p>;
-
     if (error) return <p className="font-bold text-red-600">{error}</p>;
 
     if (posts.length === 0) {
@@ -115,7 +106,6 @@ const DisplayPostComponent = () => {
                         className="border p-2 w-full mb-2"
                     />
 
-                    {/* Display comments toggle */}
                     <button
                         onClick={() => handleSeeComment(item._id)}
                         className="bg-blue-500 text-white px-4 py-2 rounded flex items-center"
@@ -124,7 +114,6 @@ const DisplayPostComponent = () => {
                         {visibleComments[item._id] ? 'Hide Comments' : 'See Comments'}
                     </button>
 
-                    {/* Display the comments if visible */}
                     {visibleComments[item._id] && item.comments && item.comments.length > 0 && (
                         <div className="mt-2 space-y-2">
                             {item.comments.map((comment, commentIndex) => (
@@ -133,7 +122,7 @@ const DisplayPostComponent = () => {
                                         <p className="font-semibold">{comment.author}</p>
                                         <p>{comment.text}</p>
                                     </div>
-                                    <button onClick={() => debouncedHandleDeleteCommentByid(item._id, comment._id)} className="text-red-500">
+                                    <button onClick={() => debouncedHandleDeleteCommentByid(item._id, comment._id, comment.autherid)} className="text-red-500">
                                         <FiTrash />
                                     </button>
                                 </div>
@@ -141,7 +130,6 @@ const DisplayPostComponent = () => {
                         </div>
                     )}
 
-                    {/* Send comment button */}
                     <button
                         onClick={() => debouncedHandleSend(item._id)}
                         className="bg-blue-500 text-white px-4 py-2 rounded flex items-center mt-2"
