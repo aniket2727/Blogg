@@ -4,12 +4,12 @@
 const url = 'http://localhost:9009/c/addcomment';
 
 // Async function to add a comment by post ID
-const AddcommentByid = async ({ postid, newpostcomment, author }) => {
+const AddcommentByid = async ({ postid, newpostcomment, author,autherid }) => {
     try {
         // Sending a POST request to the API
         const response = await fetch(url, {
             method: 'POST',
-            body: JSON.stringify({ postid, newpostcomment, author }), // Corrected JSON.stringify syntax
+            body: JSON.stringify({ postid, newpostcomment, author,autherid }), // Corrected JSON.stringify syntax
             headers: {
                 'Content-Type': 'application/json', // Corrected content type format
             },

@@ -7,6 +7,9 @@ import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { FiSend, FiMessageSquare, FiTrash } from 'react-icons/fi'; // Importing icons
 import { DeleteCommentByIds } from '../customHook/React-quary/DeletecommentUsingid';
 import { debounce } from 'lodash'; // Importing debounce from lodash
+import { useSelector } from 'react-redux';
+import { selectuserid } from '../features/userID/userIdSlice';
+
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
@@ -17,11 +20,14 @@ const DisplayPostComponent = () => {
 
     const { userEmail } = useContext(LoginDetailsContext);
 
+    // redux ids
+    const autherid=useSelector(selectuserid);
+
     // Handle adding comment
     const handleSend = async (item_post_id) => {
         try {
             const newComment = comments[item_post_id];
-            const result = await AddcommentByid({ postid: item_post_id, newpostcomment: newComment, author: userEmail });
+            const result = await AddcommentByid({ postid: item_post_id, newpostcomment: newComment, author: userEmail,autherid :autherid });
             console.log('Comment added:', result);
 
             // Clear the comment input for the post after sending
