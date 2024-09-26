@@ -32,7 +32,8 @@ const delete_post_by_id_router=require('./router/deletePostRouter');
 const getallpost=require('./router/postDataRouter');
 const postbyemail=require('./router/postDataRouter');
 const postcomment=require('./router/commentRouter');
-
+const addfollower=require('./router/followerRouter');
+const removefollower=require('./router/followerRouter');
 // Use the routes
 app.use('/app', add_user_router);
 app.use('/app1', login_user_router);
@@ -42,6 +43,10 @@ app.use('/d', delete_post_by_id_router);
 app.use('/app',getallpost);
 app.use('/post',postbyemail);
 app.use('/c',postcomment);
+app.use('/addfollow',addfollower);
+app.use('/removefollow',removefollower);
+
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
