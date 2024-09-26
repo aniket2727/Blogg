@@ -101,29 +101,33 @@ const Removeuserfromfollowerslist = async (req, resp) => {
       console.error('Error:', error);
     }
   };
-// // Get follower count for a user
-// const GetFollowerCount = async (req, resp) => {
-//   const { userid } = req.params;
-//   try {
-//     const userFollowers = await followersdata.aggregate([
-//       { $match: { _id: userid } },
-//       { $unwind: '$followersdetails' },
-//       { $group: { _id: '$_id', followerCount: { $sum: 1 } } },
-//     ]);
 
-//     if (userFollowers.length > 0) {
-//       resp.status(200).json({
-//         message: 'Follower count retrieved successfully',
-//         count: userFollowers[0].followerCount,
-//       });
-//     } else {
-//       resp.status(404).json({ message: 'User not found' });
-//     }
-//   } catch (error) {
-//     resp.status(500).json({ message: 'Internal server error', error });
-//   }
-// };
 
+  // Get follower count for a user
+const GetFollowerCount = async (req, resp) => {
+    const { userid } = req.body; // Get userid from request body
+    console.log(userid);
+    try {
+      // Use aggregation to get the count of followers
+      const followerCountResult = await followersdata.aggregate([
+        { $match: { userid: userid } }, // Match the user by userid
+        { $project: { followerCount: { $size: '$followersdetails' } } } // Project the size of followers array
+      ]);
+  
+      if (followerCountResult.length > 0) {
+        resp.status(200).json({
+          message: 'Follower count retrieved successfully',
+          count: followerCountResult[0].followerCount,
+        });
+      } else {
+        resp.status(404).json({ message: 'User not found' });
+      }
+    } catch (error) {
+      resp.status(500).json({ message: 'Internal server error', error });
+    }
+  };
+
+  
 // // Get followers' details with user info
 // const GetFollowersWithUserInfo = async (req, resp) => {
 //   const { userid } = req.params;
@@ -164,7 +168,7 @@ const Removeuserfromfollowerslist = async (req, resp) => {
 
 module.exports = {
   Addusersintoafollowerslist,
-  Removeuserfromfollowerslist
-//   GetFollowerCount,
+  Removeuserfromfollowerslist,
+  GetFollowerCount
 //   GetFollowersWithUserInfo,
 };

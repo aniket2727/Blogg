@@ -48,7 +48,7 @@ app.use('/post',postbyemail);
 app.use('/c',postcomment);
 app.use('/app',addfollower);
 app.use('/app',removefollower);
-app.use('/app',followerscount);
+app.use('/g',followerscount);
 app.use('/app',getfollowerswithUserinfo);
 
 
