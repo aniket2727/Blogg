@@ -10,6 +10,7 @@ const Addusersintoafollowerslist = async (req, resp) => {
 
     // Check if the user exists in userdata
     const userExists = await userdata.findOne({ userid: userId });
+    //const followerexits=await userdata.findOne({userid:newFollowerId});
     if (!userExists) {
       return resp.status(404).json({ message: 'User not found' });
     }
@@ -62,43 +63,44 @@ const Addusersintoafollowerslist = async (req, resp) => {
   }
 };
 
-
-// // Remove a user from the followers list
-// const Removeuserfromfollowerslist = async (req, resp) => {
-//   const { userid, newfolllowerid } = req.body;
-//   try {
-//     // Check if the user is present
-//     const userPresentorNot = await followersdata.findById(userid);
-//     if (userPresentorNot) {
-//       // Check if the follower is present in the list
-//       const checkfollowersidIsPresentorNot = userPresentorNot.followersdetails.some(
-//         (item) => item.folllowerid === newfolllowerid
-//       );
-
-//       if (checkfollowersidIsPresentorNot) {
-//         // Remove the follower from the list
-//         userPresentorNot.followersdetails = userPresentorNot.followersdetails.filter(
-//           (item) => item.folllowerid !== newfolllowerid
-//         );
-
-//         // Save the updated user document
-//         const resultAfterRemoveFollower = await userPresentorNot.save();
-
-//         resp.status(200).json({
-//           message: 'Removed from following list',
-//           data: { userid, newfolllowerid },
-//         });
-//       } else {
-//         resp.status(404).json({ message: 'Follower not found' });
-//       }
-//     } else {
-//       resp.status(404).json({ message: 'User not found' });
-//     }
-//   } catch (error) {
-//     resp.status(500).json({ message: 'Internal server error', error });
-//   }
-// };
-
+// Remove a user from the followers list
+const Removeuserfromfollowerslist = async (req, resp) => {
+    const { userId, newFollowerId } = req.body;
+  
+    try {
+      // Check if the user is present in followersdata
+      const userPresentorNot = await followersdata.findOne({ userid: userId });
+      console.log(userPresentorNot);
+      if (!userPresentorNot) {
+        return resp.status(404).json({ message: 'User not found' });
+      }
+  
+      // Check if the follower is present in the followers list
+      const followerExists = userPresentorNot.followersdetails.some(
+        (item) => item.folllowerid === newFollowerId
+      );
+  
+      if (!followerExists) {
+        return resp.status(404).json({ message: 'Follower not found' });
+      }
+  
+      // Remove the follower from the list
+      userPresentorNot.followersdetails = userPresentorNot.followersdetails.filter(
+        (item) => item.folllowerid !== newFollowerId
+      );
+  
+      // Save the updated user document
+      const resultAfterRemoveFollower = await userPresentorNot.save();
+  
+      resp.status(200).json({
+        message: 'Removed from followers list',
+        data: resultAfterRemoveFollower,
+      });
+    } catch (error) {
+      resp.status(500).json({ message: 'Internal server error', error });
+      console.error('Error:', error);
+    }
+  };
 // // Get follower count for a user
 // const GetFollowerCount = async (req, resp) => {
 //   const { userid } = req.params;
@@ -162,7 +164,7 @@ const Addusersintoafollowerslist = async (req, resp) => {
 
 module.exports = {
   Addusersintoafollowerslist,
-//   Removeuserfromfollowerslist,
+  Removeuserfromfollowerslist
 //   GetFollowerCount,
 //   GetFollowersWithUserInfo,
 };
