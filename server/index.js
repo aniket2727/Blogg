@@ -34,7 +34,8 @@ const postbyemail=require('./router/postDataRouter');
 const postcomment=require('./router/commentRouter');
 const addfollower=require('./router/followerRouter');
 const removefollower=require('./router/followerRouter');
-
+const followerscount=require('./router/followerRouter');
+const getfollowerswithUserinfo=require('./router/followerRouter');
 
 // Use the routes
 app.use('/app', add_user_router);
@@ -47,6 +48,8 @@ app.use('/post',postbyemail);
 app.use('/c',postcomment);
 app.use('/addfollow',addfollower);
 app.use('/removefollow',removefollower);
+app.use('/followerscount',followerscount);
+app.use('/getfollowersalldetails',getfollowerswithUserinfo);
 
 
 app.listen(port, () => {
