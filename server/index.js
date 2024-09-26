@@ -46,10 +46,10 @@ app.use('/d', delete_post_by_id_router);
 app.use('/app',getallpost);
 app.use('/post',postbyemail);
 app.use('/c',postcomment);
-app.use('/addfollow',addfollower);
-app.use('/removefollow',removefollower);
-app.use('/followerscount',followerscount);
-app.use('/getfollowersalldetails',getfollowerswithUserinfo);
+app.use('/app',addfollower);
+app.use('/app',removefollower);
+app.use('/app',followerscount);
+app.use('/app',getfollowerswithUserinfo);
 
 
 app.listen(port, () => {
