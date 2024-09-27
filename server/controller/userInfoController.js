@@ -6,7 +6,7 @@ const { getCacheData, setCachedata } = require('../redisClient');
 const Add_User_to_Database = async (req, res) => {
     let { name, email, password } = req.body;
     console.log(name, email, password);
-    
+
     // Validate input
     if (!name || !email || !password) {
         return res.status(400).json({ message: "Bad request data" });
@@ -18,8 +18,8 @@ const Add_User_to_Database = async (req, res) => {
         name = name.slice(0, 20);
     }
 
-    email=email.trim();
-    password=password.trim();
+    email = email.trim();
+    password = password.trim();
 
     try {
         // Check if user is already present in Redis cache
@@ -31,16 +31,27 @@ const Add_User_to_Database = async (req, res) => {
         // Check if user exists in the database
         const existingUser = await UserInfo.findOne({ email });
         if (existingUser) {
-            await setCachedata(email, JSON.stringify(existingUser)); // Cache user
+            // Cache each field manually
+            await setCachedata(email, JSON.stringify({
+                _id: existingUser._id,
+                name: existingUser.name,
+                email: existingUser.email,
+                password: existingUser.password, // Consider hashing passwords in a real app
+            }));
             return res.status(400).json({ error: "Email is already registered" });
         }
 
-        // Save the new user with plain-text password (not recommended)
+        // Save the new user with plain-text password
         const newUser = new UserInfo({ name, email, password });
         await newUser.save();
 
-        // Cache the new user in Redis
-        await setCachedata(email, JSON.stringify(newUser));
+        // Cache each field manually
+        await setCachedata(email, JSON.stringify({
+            _id: newUser._id,
+            name: newUser.name,
+            email: newUser.email,
+            password: newUser.password, // Consider hashing passwords in a real app
+        }));
 
         res.status(201).json({ message: "User added successfully" });
     } catch (error) {
@@ -51,56 +62,26 @@ const Add_User_to_Database = async (req, res) => {
 
 // Login user with email
 const Login_user_with_email = async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     console.log(email, password);
-    
 
     try {
+        // Validate request data
         if (!email || !password) {
             return res.status(400).json({ message: "Bad request data" });
         }
-         
-        email=email.trim();
-        password=password.trim();
-        // Check if user data is present in Redis cache
-        const cacheuser = await getCacheData(email);
-        if (cacheuser) {
-            const userDataFromRedis = JSON.parse(cacheuser);
-            
-            console.log("Data retrieved from Redis", userDataFromRedis);
-            console.log("Comparing passwords:", userDataFromRedis.password, "vs", password);
 
-            // Compare plain-text passwords
-            if (userDataFromRedis.password === password) {
-                // Generate JWT token
-                const token = jwt.sign(
-                    { userId: userDataFromRedis._id, email: userDataFromRedis.email },
-                    'your_secret_key', // Replace with your actual secret key
-                    { expiresIn: '1h' }
-                );
+        email = email.trim();
+        password = password.trim();
 
-                // Set cookie with the token
-                res.cookie('token', token, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: 'Strict'
-                });
-
-                return res.status(200).json({ message: "User login successful", user: userDataFromRedis, token });
-            } else {
-                return res.status(401).json({ message: "Incorrect password" });
-            }
-        }
-
-        // If not in cache, check in the database
+        // Check user data in the database
         const user_Data_with_email = await UserInfo.findOne({ email });
 
         if (user_Data_with_email) {
-            // Cache user data
-            await setCachedata(email, JSON.stringify(user_Data_with_email));
+            console.log("User found in database:", user_Data_with_email);
 
             // Compare plain-text passwords
-            if (password === user_Data_with_email.password) {
+            if (password === user_Data_with_email.password) { // Consider hashing passwords in a real app
                 // Generate JWT token
                 const token = jwt.sign(
                     { userId: user_Data_with_email._id, email: user_Data_with_email.email },
