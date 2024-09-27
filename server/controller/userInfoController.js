@@ -1,28 +1,42 @@
 const UserInfo = require('../database/schema/userInfoSchema'); // Ensure this matches the export
 const jwt = require('jsonwebtoken');
+const { getCacheData, setCachedata } = require('../redisClient');
+
+
+
 const Add_User_to_Database = async (req, res) => {
     const { name, email, password } = req.body;
-
-    console.log(name,email,password);
-
+    console.log(name, email, password);
     try {
+        // check if user is alredy present in redis cache
+        const cacheuser = await getCacheData(email);
+        if (cacheuser) {
+            return res.status(400).json({ error: "Email is already registered" });
+        }
+
+        // If not cached, check the database
         const existingUser = await UserInfo.findOne({ email });
         if (existingUser) {
+            // Cache the user in Redis to avoid future DB hits
+            setCachedata(email, existingUser);
             return res.status(400).json({ error: "Email is already registered" });
         }
 
         const newUser = new UserInfo({ name, email, password });
         await newUser.save();
+
+        // Cache the new user in Redis
+        setCachedata(email, newUser);
         res.status(201).json({ message: "User added successfully" });
     } catch (error) {
         console.error("Error in Add_User_to_Database:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Internal server error" ,error});
     }
 };
 
 const Login_user_with_email = async (req, res) => {
     const { email, password } = req.body;
-    console.log(email,password);
+    console.log(email, password);
 
     try {
         const user_Data_with_email = await UserInfo.findOne({ email: email });
@@ -50,7 +64,7 @@ const Login_user_with_email = async (req, res) => {
         }
 
         res.status(404).json({ message: "Email is not valid,pleases provide valid email" });
-       
+
     } catch (error) {
         console.error("Error in Login_user_with_email:", error);
         res.status(500).json({ message: "Internal server error" });

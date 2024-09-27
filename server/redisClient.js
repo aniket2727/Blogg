@@ -5,8 +5,6 @@ const redis=require('redis');
 const { error } = require('winston');
 const client=redis.createClient();
 
-
-
 // handle redis error globallly
 client.on('error',(error)=>{
     console.log("the error is ",error);
@@ -14,7 +12,7 @@ client.on('error',(error)=>{
 
 
 // healper to get data from the redis
-const getdata=async(key)=>{
+const getCacheData=async(key)=>{
 
     return new Promise((resolve,reject)=>{
           client.get(key,(err,data)=>{
@@ -26,11 +24,11 @@ const getdata=async(key)=>{
 
 
 // helper to get save data into redis
-const  cachedata=(key,data,expire=3000)=>{
+const  setCachedata=(key,data,expire=3000)=>{
     client.set(key,JSON.stringify(data),'EX',expire);   // default expirey in 1 hour
 };
 
 
-module.exports={getdata,cachedata};
+module.exports={getCacheData,setCachedata};
 
 
