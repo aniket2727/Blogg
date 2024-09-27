@@ -12,6 +12,11 @@ import { useSelector } from 'react-redux';
 import { selectuserid } from '../features/userID/userIdSlice';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import AddFollowersIntolist from '../helper/Addfollowershealperfuntion';
+
+
+
+
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
