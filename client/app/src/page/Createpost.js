@@ -19,6 +19,8 @@ const Createpost = () => {
   const token = useSelector(selectToken); // Fetch token from Redux
   const userId = useSelector(selectuserid); // Fetch userId from Redux
 
+  console.log("user id ",userId);
+
   console.log("the value of redux token is ",token);
 
   // Use context to get email from LoginDetailsContext
@@ -56,6 +58,7 @@ const Createpost = () => {
       const result = await Savedpostwithemail({
         email: userEmail,
         postContent: postContext,
+        postcreaterId:userId,
         token: token, // Use token from Redux
       });
       console.log("Result of saved post:", result);
