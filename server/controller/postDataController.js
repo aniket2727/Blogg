@@ -3,7 +3,11 @@ const userInfo = require('../database/schema/userInfoSchema');
 const { getCacheData, setCachedata } = require('../redisClient'); // Import Redis client functions
 
 const Add_post_with_email = async (req, resp) => {
-    const { email, postContent } = req.body;
+    const { email, postContent, postcreaterId } = req.body;
+   
+    // coalscapping operators
+    const postcreaterIdValue = postcreaterId ?? "1";
+    console.log(email,postContent,postcreaterIdValue)
 
     try {
         // Check if the post exists for the given email
@@ -13,7 +17,8 @@ const Add_post_with_email = async (req, resp) => {
             // Create a new post with the given content
             const post_content_to_save = new postdata({
                 email: email,
-                postContent: postContent
+                postContent: postContent,
+                postcreaterId:postcreaterIdValue,
             });
             const postCreated = await post_content_to_save.save();
 
@@ -30,6 +35,9 @@ const Add_post_with_email = async (req, resp) => {
         return resp.status(500).json({ message: "Internal server error" });
     }
 };
+
+
+
 
 const Delete_post_by_id = async (req, resp) => {
     const { id } = req.body;
