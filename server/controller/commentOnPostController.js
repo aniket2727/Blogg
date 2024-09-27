@@ -1,11 +1,7 @@
 const postdata = require('../database/schema/postDataSchema');
 const mongoose = require('mongoose');
-const redis = require('redis');
 const winston = require('winston');
-
-// Redis client setup
-const redisClient = redis.createClient();
-redisClient.connect();
+const { getCacheData, setCachedata } = require('../redisClient'); // Using getCacheData and setCachedata
 
 // Logger setup using winston
 const logger = winston.createLogger({
@@ -15,19 +11,32 @@ const logger = winston.createLogger({
     ]
 });
 
+// Validate input function
+const validateInput = (input) => input && typeof input === 'string' && input.trim() !== '';
+
+// Add comment on post
 const AddCommentOnPost = async (req, res) => {
-    const { postid, newpostcomment, author ,autherid} = req.body;
+    let { postid, newpostcomment, author, autherid } = req.body;
+
+    // Trim and validate input
+    postid = postid ? postid.trim() : '';
+    newpostcomment = newpostcomment ? newpostcomment.trim() : '';
+    author = author ? author.trim() : 'Anonymous'; // Default to 'Anonymous' if no author provided
+    autherid = autherid ? autherid.trim() : '';
+
+    if (!validateInput(postid) || !validateInput(newpostcomment) || !validateInput(autherid)) {
+        return res.status(400).json({ message: "Bad request data" });
+    }
 
     try {
         // Find the post by its ID
         const result = await postdata.findById(postid);
-
         if (result) {
             // Create a new comment object
             const comment = {
                 text: newpostcomment,
-                author: author || 'Anonymous' ,// Default to 'Anonymous' if no author is provided,
-                autherid:autherid,
+                author,
+                autherid,
             };
 
             // Push the new comment to the comments array
@@ -36,23 +45,34 @@ const AddCommentOnPost = async (req, res) => {
             // Save the updated post document
             await result.save();
 
+            // Invalidate cache for post comments after adding a comment
+            await setCachedata(postid, null);
+
             res.status(200).json({ message: "Comment added successfully", comment });
         } else {
             res.status(404).json({ message: "Post not found" });
         }
     } catch (error) {
+        logger.error(`Error adding comment: ${error.message}`);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
-
+// Delete comment on post by using IDs
 const DeleteCommentOnPost = async (req, res) => {
-    const { postid, commentid } = req.body;
+    let { postid, commentid } = req.body;
+
+    // Trim and validate input
+    postid = postid ? postid.trim() : '';
+    commentid = commentid ? commentid.trim() : '';
+
+    if (!validateInput(postid) || !validateInput(commentid)) {
+        return res.status(400).json({ message: "Bad request data" });
+    }
 
     try {
         // Find the post by its ID
         const result = await postdata.findById(postid);
-
         if (result) {
             // Find the index of the comment by its _id
             const commentIndex = result.comments.findIndex(comment => comment._id.toString() === commentid);
@@ -64,6 +84,9 @@ const DeleteCommentOnPost = async (req, res) => {
                 // Save the updated post document
                 await result.save();
 
+                // Invalidate cache for post comments after deleting a comment
+                await setCachedata(postid, null);
+
                 res.status(200).json({ message: "Comment deleted successfully" });
             } else {
                 res.status(404).json({ message: "Comment not found" });
@@ -72,52 +95,26 @@ const DeleteCommentOnPost = async (req, res) => {
             res.status(404).json({ message: "Post not found" });
         }
     } catch (error) {
+        logger.error(`Error deleting comment: ${error.message}`);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
-
-
-const GetallcommentbyPostId=async(req,res)=>{
-
-    const{postid}=req.postid;
-    try{
-        const findpost=await postdata.findById(postid);
-        if(findpost){
-             const allcomment=findpost.comments;
-
-             if(allcomment){
-                res.status(200).json({"message":'all comments',allcomment});
-             }else{
-                res.status(404).json({"message":"no comments on this post"});
-             }
-        }else{
-            res.status(404).json({"message":"post is not found"})
-        }
-    }
-    catch(error){
-        res.status(500).json({"message":"internal server error"});
-    }
-
-}
-
-
-
-
-// Get all comments by post ID with pagination
-// Get all comments by post ID with pagination
+// Get all comments by post ID with pagination and Redis caching
 const GetAllCommentsByPostId = async (req, res) => {
-    const { postid } = req.body; // Destructure postid from req.body
+    let { postid } = req.body; // Destructure postid from req.body
     const { limit = 10, page = 1 } = req.query; // Pagination parameters
 
-    // Validate postid
-    if (!mongoose.Types.ObjectId.isValid(postid)) {
+    // Trim and validate postid
+    postid = postid ? postid.trim() : '';
+
+    if (!validateInput(postid) || !mongoose.Types.ObjectId.isValid(postid)) {
         return res.status(400).json({ message: 'Invalid post ID format' });
     }
 
     try {
-        // Check Redis cache
-        const cachedComments = await redisClient.get(postid);
+        // Check Redis cache using getCacheData
+        const cachedComments = await getCacheData(postid);
         if (cachedComments) {
             return res.status(200).json({
                 message: 'Comments retrieved from cache',
@@ -134,8 +131,8 @@ const GetAllCommentsByPostId = async (req, res) => {
                 // Paginate comments
                 const paginatedComments = allComments.slice((page - 1) * limit, page * limit);
 
-                // Cache comments in Redis
-                await redisClient.set(postid, JSON.stringify(allComments), 'EX', 600);
+                // Cache comments in Redis using setCachedata
+                await setCachedata(postid, JSON.stringify(allComments), 'EX', 600); // Cache for 10 minutes
 
                 return res.status(200).json({
                     message: 'Comments retrieved successfully',
