@@ -31,6 +31,10 @@ const useAddFollowersToList = ({ userid, followerid, followeremail }) => {
     }
   }, [userid, followerid, followeremail]); // Dependencies to re-run on change
 
+  console.log("the data is after follow button ",data);
+  console.log("the error is after follow button ",error)
+  
+
   return { data, error, loading }; // Return state values
 };
 
