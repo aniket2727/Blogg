@@ -24,4 +24,27 @@ const Addfollowersinfo = async ({ userId, newFollowerId, newFollowerEmail }) => 
   }
 };
 
-export default Addfollowersinfo;
+
+const Getfollowerslist = async ({ userid }) => {
+  try {
+    const response = await fetch(url, {
+      method: 'POST', // Corrected capitalization
+      body: JSON.stringify({ userid }), // Fixed JSON.stringify syntax
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Unable to get data of user followers list"); // Corrected Error instantiation
+    }
+
+    const data = await response.json(); // Await the response
+    return data; // Return the parsed data
+
+  } catch (error) {
+    console.log("There is an error:", error); // Improved error logging
+    throw error; // Optionally, rethrow the error for further handling
+  }
+};
+export {Addfollowersinfo,Getfollowerslist};
