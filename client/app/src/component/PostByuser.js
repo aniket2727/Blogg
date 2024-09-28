@@ -11,7 +11,7 @@ const Postbyuser = ({ data }) => {
         }
     }, [data]);
 
-   // console.log("the data props ",userdata);
+    console.log("the data props ",userdata);
 
     const handleDeletepost = async (postId) => {
        // console.log("the selected id is ",postId);

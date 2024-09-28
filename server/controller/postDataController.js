@@ -106,17 +106,10 @@ const Getallpostbyemail = async (req, res) => {
     const { email } = req.body;
 
     try {
-        // Check Redis cache for user's posts
-        const cachedPosts = await getCacheData(email);
-        if (cachedPosts) {
-            return res.status(200).json({ message: "Posts retrieved from cache", posts: JSON.parse(cachedPosts) });
-        }
-
+        // Directly query the database for posts by email
         const findallpostbyemail = await postdata.find({ email: email });
 
         if (findallpostbyemail.length > 0) {
-            // Cache the retrieved posts
-            await setCachedata(email, JSON.stringify(findallpostbyemail), 'EX', 600); // Cache for 10 minutes
             res.status(200).json({ message: findallpostbyemail });
         } else {
             res.status(404).json({ message: "No post for this email" });
@@ -125,5 +118,6 @@ const Getallpostbyemail = async (req, res) => {
         res.status(500).json({ message: "An error occurred", error: error.message });
     }
 };
+
 
 module.exports = { Add_post_with_email, Delete_post_by_id, Update_post_by_id, Getallpost, Getallpostbyemail };
