@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { FiSend, FiMessageSquare, FiTrash } from 'react-icons/fi';
+import { FaUserCircle } from 'react-icons/fa'; // Import profile icon
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import debounce from 'lodash/debounce';
@@ -16,12 +15,8 @@ import { DeleteCommentByIds } from '../customHook/React-quary/DeletecommentUsing
 import ButtonComponent from './ButtonComponent';
 import PaginationForDisplayAllpost from './PaginationForDisplayAllpost';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
-import { Addfollowersinfo, Getfollowerslist } from '../customHook/AddfollowersApi'; // Updated import
-// Import Redux selectors
+import { Addfollowersinfo, Getfollowerslist } from '../customHook/AddfollowersApi';
 import { selectuserid } from '../features/userID/userIdSlice';
-
-// Your component logic continues...
-
 
 const DisplayPostComponent = () => {
   const [posts, setPosts] = useState([]);
@@ -31,18 +26,16 @@ const DisplayPostComponent = () => {
   const [visibleComments, setVisibleComments] = useState({});
   const [loginErrorPostId, setLoginErrorPostId] = useState(null);
   const [postid, setpostid] = useState([]);
-  const [followResponse, setFollowResponse] = useState(null); // State to track follow response
-  const [data,setData]=useState('')
+  const [followerslist, setFollowersList] = useState([]);
 
-  const { userEmail } = useContext(LoginDetailsContext); // Context API
-  const userid = useSelector(selectuserid); // Get userid from Redux
+  const { userEmail } = useContext(LoginDetailsContext);
+  const userid = useSelector(selectuserid);
 
   // Fetch posts data
   const callApisforPostData = async () => {
     try {
       const result = await GetAllpostdata();
       setPosts(result.getallpostdata);
-      console.log('Data for all posts:', result.getallpostdata);
     } catch (error) {
       setError('Failed to fetch posts');
       console.error('The error is:', error);
@@ -51,19 +44,18 @@ const DisplayPostComponent = () => {
     }
   };
 
-  const getfollowerslist=async()=>{
-     try{
-        const responce=await  Getfollowerslist({userid:userid});
-        console.log("the followers list",responce);
-     }
-     catch(error){
-        console.log("ther error is ",error);
-     }
-  }
+  const getFollowersList = async () => {
+    try {
+      const followersResponse = await Getfollowerslist({ userid });
+      setFollowersList(followersResponse);
+    } catch (error) {
+      console.log("Error fetching followers list:", error);
+    }
+  };
 
   useEffect(() => {
     callApisforPostData();
-    getfollowerslist();
+    getFollowersList();
   }, []);
 
   // Handle adding comment
@@ -73,18 +65,17 @@ const DisplayPostComponent = () => {
       return;
     }
 
-    setpostid([...postid, item_post_id]);
+    setpostid(prev => [...prev, item_post_id]);
 
     try {
       const newComment = comments[item_post_id];
-      const result = await AddcommentByid({
+      await AddcommentByid({
         postid: item_post_id,
         newpostcomment: newComment,
         author: userEmail,
         autherid: userid,
       });
-      console.log('Comment added:', result);
-      setComments((prevComments) => ({ ...prevComments, [item_post_id]: '' }));
+      setComments(prev => ({ ...prev, [item_post_id]: '' }));
       callApisforPostData();
       setLoginErrorPostId(null);
     } catch (error) {
@@ -96,18 +87,14 @@ const DisplayPostComponent = () => {
 
   // Handle comment input change
   const handleCommentChange = (e, item_post_id) => {
-    setComments((prevComments) => ({
-      ...prevComments,
-      [item_post_id]: e.target.value,
-    }));
+    setComments(prev => ({ ...prev, [item_post_id]: e.target.value }));
   };
 
   // Handle deleting comment
   const handleDeleteCommentByid = async (postid, commentid, autherid) => {
     try {
       if (autherid === userid) {
-        const response = await DeleteCommentByIds({ postid, commentid });
-        console.log(response);
+        await DeleteCommentByIds({ postid, commentid });
         callApisforPostData();
       }
     } catch (error) {
@@ -118,24 +105,19 @@ const DisplayPostComponent = () => {
   const debouncedHandleDeleteCommentByid = useCallback(debounce(handleDeleteCommentByid, 300), [userid]);
 
   // Handle following
-  // DisplayPostComponent.js
-const handleFollow = async (postCreaterId, postCreatorEmail) => {
+  const handleFollow = async (postCreaterId, postCreatorEmail) => {
     try {
-        const response = await Addfollowersinfo({
-          userId: userid,
-          newFollowerId: postCreaterId,
-          newFollowerEmail: postCreatorEmail,
-        });
-        setData(response);
-        console.log(response);
-
-      } catch (err) {
-        setError(err.message); // Set error state
-      } finally {
-        setLoading(false);
-      }
+      const response = await Addfollowersinfo({
+        userId: userid,
+        newFollowerId: postCreaterId,
+        newFollowerEmail: postCreatorEmail,
+      });
+      setFollowersList(prev => [...prev, postCreaterId]); // Add to the followers list
+      console.log('Follow response:', response);
+    } catch (err) {
+      setError(err.message);
+    }
   };
-  
 
   // Show loading state
   if (loading) return <p className="font-bold text-green-600">Loading...</p>;
@@ -157,11 +139,18 @@ const handleFollow = async (postCreaterId, postCreatorEmail) => {
       {posts.map((item) => (
         <div key={item._id} className="bg-white shadow-md rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-semibold">{item.email}</h1>
-            <ButtonComponent
-              buttonText="Follow"
-              onClick={() => handleFollow(item.postcreaterId, item.email)}
-            />
+            <div className="flex items-center">
+              <FaUserCircle className="text-gray-400 mr-2" size={24} /> {/* Profile Icon */}
+              <h1 className="text-xl font-semibold underline">{item.email}</h1> {/* Underlined email */}
+            </div>
+            {/* Conditional rendering for follow button */}
+            {item.postcreaterId !== userid && (
+              followerslist.includes(item.postcreaterId) ? (
+                <ButtonComponent buttonText='following' />
+              ) : (
+                <ButtonComponent buttonText='follow' onClick={() => handleFollow(item.postcreaterId, item.email)} />
+              )
+            )}
           </div>
 
           <div>

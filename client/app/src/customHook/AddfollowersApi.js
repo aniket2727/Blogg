@@ -40,6 +40,14 @@ const Getfollowerslist = async ({ userid }) => {
     }
 
     const data = await response.json();
+    console.log(data);
+    if(data.followers){
+       const followersarray=data.followers.map((item)=>{
+        return item.folllowerid;
+       })
+
+       return followersarray;
+    }
     return data;
 
   } catch (error) {
