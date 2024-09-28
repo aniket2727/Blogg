@@ -25,6 +25,8 @@ import PaginationForDisplayAllpost from './PaginationForDisplayAllpost';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { Addfollowersinfo, Getfollowerslist } from '../customHook/AddfollowersApi';
 import { selectuserid } from '../features/userID/userIdSlice';
+import { Deletefollowersfromdata } from '../customHook/AddfollowersApi';
+
 
 const DisplayPostComponent = () => {
     const [posts, setPosts] = useState([]);
@@ -53,30 +55,42 @@ const DisplayPostComponent = () => {
     // Fetch posts data
     const callApisforPostData = async () => {
         try {
+            setLoading(true); // Set loading true when starting to fetch posts
             const result = await GetAllpostdata();
             setPosts(result.getallpostdata);
         } catch (error) {
             setError('Failed to fetch posts');
             console.error('The error is:', error);
         } finally {
-            setLoading(false);
+            setLoading(false); // Ensure loading is set to false in the finally block
         }
     };
 
     // Fetch followers list
     const getFollowersList = async () => {
-        try {
-            const followersResponse = await Getfollowerslist({ userid });
-            setFollowersList(followersResponse);
-        } catch (error) {
-            console.log("Error fetching followers list:", error);
+        if (userid) { // Check if userid is available
+            try {
+                const followersResponse = await Getfollowerslist({ userid });
+                setFollowersList(followersResponse);
+            } catch (error) {
+                console.log("Error fetching followers list:", error);
+            }
+        } else {
+            console.log("userid is undefined. Skipping followers fetch.");
         }
     };
 
+    // useEffect to fetch posts and followers
     useEffect(() => {
+        // Fetch posts data on mount
         callApisforPostData();
-        getFollowersList();
-    }, []);
+
+        // Fetch followers list if userid is available
+        if (userid) {
+            getFollowersList();
+        }
+    }, [userid]); // Add userid as a dependency
+
 
     // Handle adding comment
     const handleSend = async (item_post_id) => {
@@ -140,23 +154,41 @@ const DisplayPostComponent = () => {
     };
 
     // Handle removing from the following list
-    const handleRemovefromfollowinglist = (followerid) => {
+    const handleRemovefromfollowinglist = async (followerid) => {
+        // Open the dialog
+        handleClickOpen();
         try {
-            console.log("the followers id", followerid)
-            handleClickOpen();
-            if (followerslist.includes(followerid)) {
-                console.log("found");
-                const newlist = followerslist.filter((item) => item !== followerid);
-                setFollowersList(newlist);
+            console.log("The follower's id:", followerid);
+            // after handleclose the value of opern change to false means it allow to remove follower
+            if (!open) {
+                // Check if the follower is found
+                if (followerslist.includes(followerid)) {
+                    console.log("Found");
+
+                    // Update the followers list locally
+                    const newlist = followerslist.filter((item) => item !== followerid);
+                    setFollowersList(newlist);
+
+                    // Call the API to delete the follower from the backend
+                    const response = await Deletefollowersfromdata({
+                        userid: userid,
+                        followerid: followerid,
+                    });
+                    console.log(response);
+
+                    // Refresh the followers list after deletion
+                    await Getfollowerslist();
+
+
+                } else {
+                    console.log("Not found");
+                }
             }
-            else{
-                console.log("not found");
-            }
-        }
-        catch (error) {
-            console.log("the error is ", error);
+        } catch (error) {
+            console.log("The error is:", error);
         }
     };
+
 
     // Show loading state
     if (loading) return <p className="font-bold text-green-600">Loading...</p>;
@@ -232,17 +264,12 @@ const DisplayPostComponent = () => {
                     {visibleComments[item._id] && item.comments && item.comments.length > 0 && (
                         <div className="mt-2 space-y-2 w-full">
                             {item.comments.map((comment) => (
-                                <div key={comment._id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
-                                    <div>
-                                        <p className="font-semibold">{comment.author}</p>
-                                        <p>{comment.text}</p>
-                                    </div>
-
-                                    {/* Allow delete if the comment author is the logged-in user */}
+                                <div key={comment._id} className="flex items-center justify-between">
+                                    <p>{comment.comment}</p>
                                     {comment.autherid === userid && (
                                         <button
                                             onClick={() => debouncedHandleDeleteCommentByid(item._id, comment._id, comment.autherid)}
-                                            className="text-red-500 p-2"
+                                            className="text-red-500"
                                         >
                                             <FiTrash />
                                         </button>
@@ -254,20 +281,23 @@ const DisplayPostComponent = () => {
                 </div>
             ))}
 
-
-
-            {/* Dialog for following action confirmation */}
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Confirmation</DialogTitle>
+            {/* Dialog for removing followers */}
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Are you sure you want to unfollow?"}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        You have unfollowed this user. Would you like to do anything else?
+                    <DialogContentText id="alert-dialog-description">
+                        After unfollowing, you will not be able to view their posts or updates.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleClose}>Disagree</Button>
                     <Button onClick={handleClose} autoFocus>
-                        Okay
+                        Agree
                     </Button>
                 </DialogActions>
             </Dialog>

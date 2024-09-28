@@ -80,4 +80,36 @@ const Getfollowerscount = async ({ userid }) => {
   }
 };
 
-export { Addfollowersinfo, Getfollowerslist,Getfollowerscount };
+
+const Deletefollowersfromdata = async ({ userid, followerid }) => {
+  if (!userid || !followerid) {
+    return "Please provide all data";
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/removefollower`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: userid,
+        newFollowerId: followerid,
+      }),
+    });
+
+    // Check if the response is OK
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data; // Return the response data after removal
+
+  } catch (error) {
+    console.log("The error is:", error);
+    return `Error: ${error.message}`;
+  }
+};
+
+export { Addfollowersinfo, Getfollowerslist,Getfollowerscount ,Deletefollowersfromdata};
