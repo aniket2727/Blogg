@@ -7,6 +7,7 @@ const { getCacheData, setCachedata } = require('../redisClient');
 const Addusersintoafollowerslist = async (req, resp) => {
   try {
     const { userId, newFollowerId, newFollowerEmail } = req.body;
+    console.log("fiels ",userId,newFollowerId,newFollowerEmail);
 
     // Validate input
     if (!userId || !newFollowerId || !newFollowerEmail) {

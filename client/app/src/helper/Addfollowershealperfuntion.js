@@ -1,41 +1,36 @@
+// AddFollowersToList.js
 import { useState, useEffect } from "react";
-import { Addfollowersinfo } from "../customHook/AddfollowersApi";
+import Addfollowersinfo from '../customHook/AddfollowersApi';
 
-// Custom hook to add followers into the list
-const useAddFollowersToList = ({ userid, followerid, followeremail }) => {
+const AddFollowersToList = ({ userid, followerid, followeremail }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const [data, setData] = useState(null);
 
   useEffect(() => {
     const addFollowers = async () => {
-      setLoading(true); // Start loading
-      setError(false); // Reset error state
+      if (!userid || !followerid || !followeremail) return;
+
+      setLoading(true);
+      setError(null);
       try {
         const response = await Addfollowersinfo({
           userId: userid,
           newFollowerId: followerid,
           newFollowerEmail: followeremail,
         });
-        setData(response); // Set data if successful
+        setData(response);
       } catch (err) {
-        setError(true); // Set error state if request fails
+        setError(err.message); // Set error state
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
-    // Trigger the function when hook is used
-    if (userid && followerid && followeremail) {
-      addFollowers();
-    }
-  }, [userid, followerid, followeremail]); // Dependencies to re-run on change
+    addFollowers();
+  }, [userid, followerid, followeremail]);
 
-  console.log("the data is after follow button ",data);
-  console.log("the error is after follow button ",error)
-  
-
-  return { data, error, loading }; // Return state values
+  return { data, error, loading };
 };
 
-export default useAddFollowersToList;
+export default AddFollowersToList;
