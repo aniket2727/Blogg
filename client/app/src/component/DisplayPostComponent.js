@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { FiSend, FiMessageSquare, FiTrash } from 'react-icons/fi';
@@ -14,10 +16,12 @@ import { DeleteCommentByIds } from '../customHook/React-quary/DeletecommentUsing
 import ButtonComponent from './ButtonComponent';
 import PaginationForDisplayAllpost from './PaginationForDisplayAllpost';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
-//import AddFollowersToList from '../helper/Addfollowershealperfuntion';
-import Addfollowersinfo from '../customHook/AddfollowersApi';
+import { Addfollowersinfo, Getfollowerslist } from '../customHook/AddfollowersApi'; // Updated import
 // Import Redux selectors
 import { selectuserid } from '../features/userID/userIdSlice';
+
+// Your component logic continues...
+
 
 const DisplayPostComponent = () => {
   const [posts, setPosts] = useState([]);
@@ -47,8 +51,19 @@ const DisplayPostComponent = () => {
     }
   };
 
+  const getfollowerslist=async()=>{
+     try{
+        const responce=await  Getfollowerslist({userid:userid});
+        console.log("the followers list",responce);
+     }
+     catch(error){
+        console.log("ther error is ",error);
+     }
+  }
+
   useEffect(() => {
     callApisforPostData();
+    getfollowerslist();
   }, []);
 
   // Handle adding comment

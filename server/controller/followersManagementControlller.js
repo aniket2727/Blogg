@@ -126,47 +126,35 @@ const GetFollowerCount = async (req, resp) => {
 
 
   
-// // Get followers' details with user info
-// const GetFollowersWithUserInfo = async (req, resp) => {
-//   const { userid } = req.params;
-//   try {
-//     const followersDetails = await followersdata.aggregate([
-//       { $match: { _id: userid } },
-//       { $unwind: '$followersdetails' },
-//       {
-//         $lookup: {
-//           from: 'userinfo', // Make sure this matches your user info collection name
-//           localField: 'followersdetails.folllowerid',
-//           foreignField: 'userid', // Assuming 'userid' is the field in user info schema
-//           as: 'followerInfo',
-//         },
-//       },
-//       {
-//         $project: {
-//           _id: 0,
-//           'followersdetails.folllowerid': 1,
-//           'followersdetails.followeremail': 1,
-//           followerInfo: { $arrayElemAt: ['$followerInfo', 0] }, // Get the first matched user info
-//         },
-//       },
-//     ]);
+// Get followers' details with user info
+// Get followers' details for a particular user
+const GetFollowersWithUserInfo = async (req, resp) => {
+  const { userid } = req.body; // Extract user ID from request body
 
-//     if (followersDetails.length > 0) {
-//       resp.status(200).json({
-//         message: 'Followers details retrieved successfully',
-//         followers: followersDetails,
-//       });
-//     } else {
-//       resp.status(404).json({ message: 'No followers found for this user' });
-//     }
-//   } catch (error) {
-//     resp.status(500).json({ message: 'Internal server error', error });
-//   }
-// };
+  try {
+    // Find the follower details for the specified user ID
+    const followersDetails = await followersdata.findOne(
+      { userid: userid }, // Match the user ID
+      { followersdetails: 1 } // Only return the followers details field
+    );
+
+    if (followersDetails && followersDetails.followersdetails.length > 0) {
+      resp.status(200).json({
+        message: 'Followers details retrieved successfully',
+        followers: followersDetails.followersdetails, // Send the followers details
+      });
+    } else {
+      resp.status(404).json({ message: 'No followers found for this user' });
+    }
+  } catch (error) {
+    resp.status(500).json({ message: 'Internal server error', error });
+  }
+};
+
 
 module.exports = {
   Addusersintoafollowerslist,
   Removeuserfromfollowerslist,
-  GetFollowerCount
-//   GetFollowersWithUserInfo,
+  GetFollowerCount,
+  GetFollowersWithUserInfo,
 };

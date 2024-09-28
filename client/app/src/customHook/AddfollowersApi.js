@@ -1,10 +1,10 @@
 // AddfollowersApi.js
-const url = 'http://localhost:9009/app/addfollower';
+const BASE_URL = 'http://localhost:9009/app';
 
 const Addfollowersinfo = async ({ userId, newFollowerId, newFollowerEmail }) => {
-  console.log('aaa',userId,newFollowerId,newFollowerEmail);
+  console.log('aaa', userId, newFollowerId, newFollowerEmail);
   try {
-    const response = await fetch(url, {
+    const response = await fetch(`${BASE_URL}/addfollower`, {
       method: 'POST',
       body: JSON.stringify({ userId, newFollowerId, newFollowerEmail }),
       headers: {
@@ -24,27 +24,28 @@ const Addfollowersinfo = async ({ userId, newFollowerId, newFollowerEmail }) => 
   }
 };
 
-
 const Getfollowerslist = async ({ userid }) => {
   try {
-    const response = await fetch(url, {
-      method: 'POST', // Corrected capitalization
-      body: JSON.stringify({ userid }), // Fixed JSON.stringify syntax
+    const response = await fetch(`${BASE_URL}/getf`, {
+      method: 'post',
+      body: JSON.stringify({ userid }),
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
-      throw new Error("Unable to get data of user followers list"); // Corrected Error instantiation
+      const errorMessage = await response.text();
+      throw new Error(`Unable to get data of user followers list: ${errorMessage}`);
     }
 
-    const data = await response.json(); // Await the response
-    return data; // Return the parsed data
+    const data = await response.json();
+    return data;
 
   } catch (error) {
-    console.log("There is an error:", error); // Improved error logging
+    console.log("There is an error:", error);
     throw error; // Optionally, rethrow the error for further handling
   }
 };
-export {Addfollowersinfo,Getfollowerslist};
+
+export { Addfollowersinfo, Getfollowerslist };

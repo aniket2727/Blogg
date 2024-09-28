@@ -4,14 +4,14 @@ const {
     Addusersintoafollowerslist, 
     Removeuserfromfollowerslist, 
     GetFollowerCount, 
-    // GetFollowersWithUserInfo 
+    GetFollowersWithUserInfo 
 } = require('../controller/followersManagementControlller');
 
 // Routes
 router.post('/addfollower', Addusersintoafollowerslist); // Add follower
 router.post('/removefollower', Removeuserfromfollowerslist); // Remove follower
 router.post('/g', GetFollowerCount); // Get follower count
-// router.get('/getfollowersuserinfo/:userid', GetFollowersWithUserInfo); // Get followers info
+router.post('/getf', GetFollowersWithUserInfo); // Get followers info
 
 // Export router
 module.exports = router;
