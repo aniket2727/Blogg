@@ -119,6 +119,14 @@ const DisplayPostComponent = () => {
     }
   };
 
+  // handle from the removing from the following list
+  const handleRemovefromfollowinglist=(followerid)=>{
+      if(followerslist.includes(followerid)){
+        const newlist=followerslist.filter((item)=>item!==followerslist);
+        setFollowersList(newlist);
+      }
+  }
+
   // Show loading state
   if (loading) return <p className="font-bold text-green-600">Loading...</p>;
 
@@ -146,7 +154,7 @@ const DisplayPostComponent = () => {
             {/* Conditional rendering for follow button */}
             {item.postcreaterId !== userid && (
               followerslist.includes(item.postcreaterId) ? (
-                <ButtonComponent buttonText='following' />
+                <ButtonComponent buttonText='following'onClick={()=>handleRemovefromfollowinglist(item.postCreaterId)} />
               ) : (
                 <ButtonComponent buttonText='follow' onClick={() => handleFollow(item.postcreaterId, item.email)} />
               )
