@@ -60,24 +60,23 @@ const Getfollowerslist = async ({ userid }) => {
 
 const Getfollowerscount = async ({ userid }) => {
   try {
-    const response = await fetch(`${BASE_URL}/g`, { // Fixed the URL syntax
-      method: 'POST', // POST method should be capitalized
-      body: JSON.stringify({ userid: userid }), // Use 'body' instead of 'data'
+    const response = await fetch(`${BASE_URL}/g`, {
+      method: 'post',
+      body: JSON.stringify({ userid }),
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      throw new Error("Unable to get count"); // Throw error if response is not ok
+      throw new Error("Unable to get count");
     }
 
-    const result = await response.json(); // Corrected to 'json()'
-    return result;
-
+    const result = await response.json(); // Ensure this is `.json()`, not `.JSON()`
+    return result.count; // Extract the count from the response
   } catch (error) {
-    console.log("The error is", error); // Log the error
-    throw error; // Optionally rethrow the error for further handling
+    console.log("The error is ", error);
+    return 0; // Return 0 or some default value in case of error
   }
 };
 
