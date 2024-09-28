@@ -8,6 +8,14 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import debounce from 'lodash/debounce';
 
+// Material UI components
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 // Import custom hooks and components
 import GetAllpostdata from '../customHook/GetallPostdataApi';
 import { AddcommentByid } from '../customHook/AddCommentbyid';
@@ -19,213 +27,252 @@ import { Addfollowersinfo, Getfollowerslist } from '../customHook/AddfollowersAp
 import { selectuserid } from '../features/userID/userIdSlice';
 
 const DisplayPostComponent = () => {
-  const [posts, setPosts] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [comments, setComments] = useState({});
-  const [visibleComments, setVisibleComments] = useState({});
-  const [loginErrorPostId, setLoginErrorPostId] = useState(null);
-  const [postid, setpostid] = useState([]);
-  const [followerslist, setFollowersList] = useState([]);
+    const [posts, setPosts] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [comments, setComments] = useState({});
+    const [visibleComments, setVisibleComments] = useState({});
+    const [loginErrorPostId, setLoginErrorPostId] = useState(null);
+    const [postid, setpostid] = useState([]);
+    const [followerslist, setFollowersList] = useState([]);
 
-  const { userEmail } = useContext(LoginDetailsContext);
-  const userid = useSelector(selectuserid);
+    const { userEmail } = useContext(LoginDetailsContext);
+    const userid = useSelector(selectuserid);
+    const [open, setOpen] = React.useState(false);
 
-  // Fetch posts data
-  const callApisforPostData = async () => {
-    try {
-      const result = await GetAllpostdata();
-      setPosts(result.getallpostdata);
-    } catch (error) {
-      setError('Failed to fetch posts');
-      console.error('The error is:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Handle opening the dialog
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
 
-  const getFollowersList = async () => {
-    try {
-      const followersResponse = await Getfollowerslist({ userid });
-      setFollowersList(followersResponse);
-    } catch (error) {
-      console.log("Error fetching followers list:", error);
-    }
-  };
+    // Handle closing the dialog
+    const handleClose = () => {
+        setOpen(false);
+    };
 
-  useEffect(() => {
-    callApisforPostData();
-    getFollowersList();
-  }, []);
+    // Fetch posts data
+    const callApisforPostData = async () => {
+        try {
+            const result = await GetAllpostdata();
+            setPosts(result.getallpostdata);
+        } catch (error) {
+            setError('Failed to fetch posts');
+            console.error('The error is:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  // Handle adding comment
-  const handleSend = async (item_post_id) => {
-    if (!userid) {
-      setLoginErrorPostId(item_post_id);
-      return;
-    }
+    // Fetch followers list
+    const getFollowersList = async () => {
+        try {
+            const followersResponse = await Getfollowerslist({ userid });
+            setFollowersList(followersResponse);
+        } catch (error) {
+            console.log("Error fetching followers list:", error);
+        }
+    };
 
-    setpostid(prev => [...prev, item_post_id]);
-
-    try {
-      const newComment = comments[item_post_id];
-      await AddcommentByid({
-        postid: item_post_id,
-        newpostcomment: newComment,
-        author: userEmail,
-        autherid: userid,
-      });
-      setComments(prev => ({ ...prev, [item_post_id]: '' }));
-      callApisforPostData();
-      setLoginErrorPostId(null);
-    } catch (error) {
-      console.error('Error adding comment:', error);
-    }
-  };
-
-  const debouncedHandleSend = useCallback(debounce(handleSend, 300), [comments]);
-
-  // Handle comment input change
-  const handleCommentChange = (e, item_post_id) => {
-    setComments(prev => ({ ...prev, [item_post_id]: e.target.value }));
-  };
-
-  // Handle deleting comment
-  const handleDeleteCommentByid = async (postid, commentid, autherid) => {
-    try {
-      if (autherid === userid) {
-        await DeleteCommentByIds({ postid, commentid });
+    useEffect(() => {
         callApisforPostData();
-      }
-    } catch (error) {
-      console.log(error);
+        getFollowersList();
+    }, []);
+
+    // Handle adding comment
+    const handleSend = async (item_post_id) => {
+        if (!userid) {
+            setLoginErrorPostId(item_post_id);
+            return;
+        }
+
+        setpostid(prev => [...prev, item_post_id]);
+
+        try {
+            const newComment = comments[item_post_id];
+            await AddcommentByid({
+                postid: item_post_id,
+                newpostcomment: newComment,
+                author: userEmail,
+                autherid: userid,
+            });
+            setComments(prev => ({ ...prev, [item_post_id]: '' }));
+            callApisforPostData();
+            setLoginErrorPostId(null);
+        } catch (error) {
+            console.error('Error adding comment:', error);
+        }
+    };
+
+    const debouncedHandleSend = useCallback(debounce(handleSend, 300), [comments]);
+
+    // Handle comment input change
+    const handleCommentChange = (e, item_post_id) => {
+        setComments(prev => ({ ...prev, [item_post_id]: e.target.value }));
+    };
+
+    // Handle deleting comment
+    const handleDeleteCommentByid = async (postid, commentid, autherid) => {
+        try {
+            if (autherid === userid) {
+                await DeleteCommentByIds({ postid, commentid });
+                callApisforPostData();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const debouncedHandleDeleteCommentByid = useCallback(debounce(handleDeleteCommentByid, 300), [userid]);
+
+    // Handle following
+    const handleFollow = async (postCreaterId, postCreatorEmail) => {
+        try {
+            const response = await Addfollowersinfo({
+                userId: userid,
+                newFollowerId: postCreaterId,
+                newFollowerEmail: postCreatorEmail,
+            });
+            setFollowersList(prev => [...prev, postCreaterId]); // Add to the followers list
+            console.log('Follow response:', response);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    // Handle removing from the following list
+    const handleRemovefromfollowinglist = (followerid) => {
+        try {
+            console.log("the followers id", followerid)
+            handleClickOpen();
+            if (followerslist.includes(followerid)) {
+                console.log("found");
+                const newlist = followerslist.filter((item) => item !== followerid);
+                setFollowersList(newlist);
+            }
+            else{
+                console.log("not found");
+            }
+        }
+        catch (error) {
+            console.log("the error is ", error);
+        }
+    };
+
+    // Show loading state
+    if (loading) return <p className="font-bold text-green-600">Loading...</p>;
+
+    // Show error if data fetching fails
+    if (error) return <p className="font-bold text-red-600">{error}</p>;
+
+    // Show message when there are no posts available
+    if (posts.length === 0) {
+        return (
+            <div className="flex items-center justify-center p-4">
+                <p className="font-bold text-red-600">Oops, currently no posts available</p>
+            </div>
+        );
     }
-  };
 
-  const debouncedHandleDeleteCommentByid = useCallback(debounce(handleDeleteCommentByid, 300), [userid]);
-
-  // Handle following
-  const handleFollow = async (postCreaterId, postCreatorEmail) => {
-    try {
-      const response = await Addfollowersinfo({
-        userId: userid,
-        newFollowerId: postCreaterId,
-        newFollowerEmail: postCreatorEmail,
-      });
-      setFollowersList(prev => [...prev, postCreaterId]); // Add to the followers list
-      console.log('Follow response:', response);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // handle from the removing from the following list
-  const handleRemovefromfollowinglist=(followerid)=>{
-      if(followerslist.includes(followerid)){
-        const newlist=followerslist.filter((item)=>item!==followerslist);
-        setFollowersList(newlist);
-      }
-  }
-
-  // Show loading state
-  if (loading) return <p className="font-bold text-green-600">Loading...</p>;
-
-  // Show error if data fetching fails
-  if (error) return <p className="font-bold text-red-600">{error}</p>;
-
-  // Show message when there are no posts available
-  if (posts.length === 0) {
     return (
-      <div className="flex items-center justify-center p-4">
-        <p className="font-bold text-red-600">Oops, currently no posts available</p>
-      </div>
-    );
-  }
+        <div className="space-y-4">
+            {posts.map((item) => (
+                <div key={item._id} className="bg-white shadow-md rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center">
+                            <FaUserCircle className="text-gray-400 mr-2" size={24} /> {/* Profile Icon */}
+                            <h1 className="text-xl font-semibold underline">{item.email}</h1> {/* Underlined email */}
+                        </div>
+                        {/* Conditional rendering for follow button */}
+                        {item.postcreaterId !== userid && (
+                            followerslist.includes(item.postcreaterId) ? (
+                                <ButtonComponent buttonText='following' onClick={() => handleRemovefromfollowinglist(item.postcreaterId)} />
+                            ) : (
+                                <ButtonComponent buttonText='follow' onClick={() => handleFollow(item.postcreaterId, item.email)} />
+                            )
+                        )}
+                    </div>
 
-  return (
-    <div className="space-y-4">
-      {posts.map((item) => (
-        <div key={item._id} className="bg-white shadow-md rounded-lg p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <FaUserCircle className="text-gray-400 mr-2" size={24} /> {/* Profile Icon */}
-              <h1 className="text-xl font-semibold underline">{item.email}</h1> {/* Underlined email */}
-            </div>
-            {/* Conditional rendering for follow button */}
-            {item.postcreaterId !== userid && (
-              followerslist.includes(item.postcreaterId) ? (
-                <ButtonComponent buttonText='following'onClick={()=>handleRemovefromfollowinglist(item.postCreaterId)} />
-              ) : (
-                <ButtonComponent buttonText='follow' onClick={() => handleFollow(item.postcreaterId, item.email)} />
-              )
-            )}
-          </div>
+                    <div>
+                        <p className="text-gray-700">{item.postContent}</p>
+                        {item.postContent.length < 50 && <div className="h-12 w-full"></div>}
+                    </div>
 
-          <div>
-            <p className="text-gray-700">{item.postContent}</p>
-            {item.postContent.length < 50 && <div className="h-12 w-full"></div>}
-          </div>
+                    {/* Button row for 'See Comment' and 'Send Comment' */}
+                    <div className="flex space-x-2 mb-4">
+                        <button
+                            onClick={() => setVisibleComments((prevState) => ({ ...prevState, [item._id]: !prevState[item._id] }))}
+                            className="bg-blue-500 text-white py-1 px-3 rounded"
+                        >
+                            <FiMessageSquare />
+                        </button>
+                        <button
+                            onClick={() => debouncedHandleSend(item._id)}
+                            className="bg-blue-500 text-white py-1 px-3 rounded"
+                        >
+                            <FiSend />
+                        </button>
+                    </div>
 
-          {/* Button row for 'See Comment' and 'Send Comment' */}
-          <div className="flex space-x-2 mb-4">
-            <button
-              onClick={() => setVisibleComments((prevState) => ({ ...prevState, [item._id]: !prevState[item._id] }))}
-              className="bg-blue-500 text-white py-1 px-3 rounded"
-            >
-              <FiMessageSquare />
-            </button>
-            <button
-              onClick={() => debouncedHandleSend(item._id)}
-              className="bg-blue-500 text-white py-1 px-3 rounded"
-            >
-              <FiSend />
-            </button>
-          </div>
+                    {/* Input for comments */}
+                    <input
+                        placeholder="Comment"
+                        value={comments[item._id] || ''}
+                        onChange={(e) => handleCommentChange(e, item._id)}
+                        className="border p-2 w-full mb-2"
+                    />
 
-          {/* Input for comments */}
-          <input
-            placeholder="Comment"
-            value={comments[item._id] || ''}
-            onChange={(e) => handleCommentChange(e, item._id)}
-            className="border p-2 w-full mb-2"
-          />
+                    {/* Display error if trying to comment without login */}
+                    {loginErrorPostId === item._id && (
+                        <Stack sx={{ width: '100%' }} spacing={2}>
+                            <Alert severity="error">Please log in to add a comment</Alert>
+                        </Stack>
+                    )}
 
-          {/* Display error if trying to comment without login */}
-          {loginErrorPostId === item._id && (
-            <Stack sx={{ width: '100%' }} spacing={2}>
-              <Alert severity="error">Please log in to add a comment</Alert>
-            </Stack>
-          )}
+                    {/* Show comments */}
+                    {visibleComments[item._id] && item.comments && item.comments.length > 0 && (
+                        <div className="mt-2 space-y-2 w-full">
+                            {item.comments.map((comment) => (
+                                <div key={comment._id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
+                                    <div>
+                                        <p className="font-semibold">{comment.author}</p>
+                                        <p>{comment.text}</p>
+                                    </div>
 
-          {/* Show comments */}
-          {visibleComments[item._id] && item.comments && item.comments.length > 0 && (
-            <div className="mt-2 space-y-2 w-full">
-              {item.comments.map((comment) => (
-                <div key={comment._id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
-                  <div>
-                    <p className="font-semibold">{comment.author}</p>
-                    <p>{comment.text}</p>
-                  </div>
-
-                  {/* Allow delete if the comment author is the logged-in user */}
-                  {comment.autherid === userid && (
-                    <button
-                      onClick={() => debouncedHandleDeleteCommentByid(item._id, comment._id, comment.autherid)}
-                      className="text-red-500 p-2"
-                    >
-                      <FiTrash />
-                    </button>
-                  )}
+                                    {/* Allow delete if the comment author is the logged-in user */}
+                                    {comment.autherid === userid && (
+                                        <button
+                                            onClick={() => debouncedHandleDeleteCommentByid(item._id, comment._id, comment.autherid)}
+                                            className="text-red-500 p-2"
+                                        >
+                                            <FiTrash />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+            ))}
 
-      <PaginationForDisplayAllpost allpostdata={posts} />
-    </div>
-  );
+
+
+            {/* Dialog for following action confirmation */}
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Confirmation</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        You have unfollowed this user. Would you like to do anything else?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleClose} autoFocus>
+                        Okay
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </div>
+    );
 };
 
 export default DisplayPostComponent;
