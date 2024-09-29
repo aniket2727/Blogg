@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-
 import React, { useState, useEffect } from 'react';
 import ButtonComponent from './ButtonComponent';
 
-const PaginationForDisplayAllpost = ({ allpostdata }) => {
+const PaginationForDisplayAllpost = ({ allpostdata = [] }) => { // Default to an empty array
     const [basicCount, setBasicCount] = useState(10);
     const [postdatalength, setPostDataLength] = useState(0);
     const [pagescount, setPagesCount] = useState(1);
@@ -18,9 +17,9 @@ const PaginationForDisplayAllpost = ({ allpostdata }) => {
     };
 
     useEffect(() => {
-        const result = allpostdata.length;
+        const result = allpostdata.length || 0; // Ensure length is calculated safely
         setPostDataLength(result);
-        setPagesCount(Math.ceil(result / basicCount)); // Correcting the calculation
+        setPagesCount(Math.ceil(result / basicCount)); // Correct the calculation
     }, [allpostdata, basicCount]);
 
     return (
