@@ -278,7 +278,9 @@ const DisplayPostComponent = () => {
                             ))}
                         </div>
                     )}
+                    <PaginationForDisplayAllpost data={posts}/>
                 </div>
+              
             ))}
 
             {/* Dialog for removing followers */}

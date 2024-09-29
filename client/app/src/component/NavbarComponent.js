@@ -1,80 +1,90 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useContext } from 'react';
-import ButtonComponent from './ButtonComponent';
-import debounce from 'lodash/debounce';
-import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearToken  } from '../features/token/tokenSlice'; // Adjust the path accordingly
-import { clearUserId } from '../features/userID/userIdSlice'; // Adjust the path accordingly
-import { selectToken } from '../features/token/tokenSlice';
-import { selectuserid } from '../features/userID/userIdSlice';
+import debounce from 'lodash/debounce';
+import { IconButton, Avatar } from '@mui/material';
+import { blue } from '@mui/material/colors';
+import { FaUserCircle } from 'react-icons/fa'; // Import the user icon from react-icons
+
+import ButtonComponent from './ButtonComponent'; // Custom Button Component
+import ProfileDialog from '../helper/NavbarHelperforProfileShow'; // ProfileDialog for user info
+import LoginDetailsContext from '../contextApis/LoginDetailsContext'; // Context for login details
+import { clearToken, selectToken } from '../features/token/tokenSlice'; // Redux slice for token
+import { clearUserId, selectuserid } from '../features/userID/userIdSlice'; // Redux slice for userId
 
 const NavbarComponent = () => {
-  // Use context APIs
-  const { setUserEmail } = useContext(LoginDetailsContext);
+  // Context API hooks
+  const {userEmail, setUserEmail } = useContext(LoginDetailsContext);
 
   // Redux hooks
   const dispatch = useDispatch();
- 
-
-  // Get token and userId from Redux state
   const token = useSelector(selectToken); // Fetch token from Redux
   const userId = useSelector(selectuserid); // Fetch userId from Redux
- 
-  console.log("navbar token",token);
-  console.log("navbar userid",userId)
 
-  // Use navigate and location
+  // Router hooks
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Local state for login status
+  // Local state for dialog and login status
+  const [open, setOpen] = useState(false);
   const [loginStatus, setLoginStatus] = useState(false);
 
-  // Debounced navigation handler
-  const handleButtonClick = debounce((action) => {
-    console.log("Button was clicked");
+  // Example user data (can be passed as props if needed)
+  const userInfo = {
+    email: userEmail,
+    followers: 120,
+    postCount: 45,
+  };
 
+  // Handle profile dialog open/close
+  const handleClickOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  // Debounced button click handler for navigation and actions
+  const handleButtonClick = debounce((action) => {
     if (action === 'login') {
       navigate('/login');
     } else if (action === 'register') {
       navigate('/signup');
     } else if (action === 'logout') {
-      // Clear user data on logout
-      setUserEmail(''); // Clear user email in context
+      setUserEmail(''); // Clear context email
       dispatch(clearUserId()); // Clear user ID in Redux
       dispatch(clearToken()); // Clear token in Redux
       localStorage.removeItem('token'); // Clear token from local storage
-      setLoginStatus(false); // Clear local login status
-      console.log('Logged out');
+      setLoginStatus(false); // Update login status
     } else if (action === 'home') {
       navigate('/home');
     }
   }, 300);
 
-  // Update login status based on the presence of userId and token
+  // Update login status based on token and userId from Redux
   useEffect(() => {
-    // Set login status based on the presence of userId and token
     if (userId && token) {
-      setLoginStatus(true); // Set login status if logged in
+      setLoginStatus(true);
     } else {
-      setLoginStatus(false); // Clear login status if logged out
+      setLoginStatus(false);
     }
   }, [userId, token]);
 
-  // Check if current route is not home
+  // Determine if current route is not home
   const isNotHome = location.pathname !== '/home';
 
   return (
     <div className="bg-gray-800 text-white">
-      <div className="p-4">
+      <div className="p-4 flex justify-between items-center">
         <h1 className="text-3xl font-bold">Corporate Katta</h1>
+
+        {/* Profile Icon and Dialog */}
+        <IconButton onClick={handleClickOpen}>
+          <FaUserCircle size={30} color="white" /> {/* Icon with customizable size and color */}
+        </IconButton>
+        <ProfileDialog open={open} onClose={handleClose} userInfo={userInfo} />
       </div>
 
       <div className="p-4 flex items-center space-x-4">
-        {/* Show "Home" button if not on home page */}
+        {/* Home Button */}
         {isNotHome && (
           <ButtonComponent
             buttonText="Home"
@@ -83,8 +93,8 @@ const NavbarComponent = () => {
           />
         )}
 
-        {/* Show Login and Register buttons when not logged in */}
-        {!loginStatus && (
+        {/* Conditional Rendering: Login/Register or Logout */}
+        {!loginStatus ? (
           <>
             <ButtonComponent
               buttonText="Login"
@@ -97,10 +107,7 @@ const NavbarComponent = () => {
               onClick={() => handleButtonClick('register')}
             />
           </>
-        )}
-
-        {/* Show Logout button when logged in */}
-        {loginStatus && (
+        ) : (
           <ButtonComponent
             buttonText="Logout"
             backgroundColorprop="bg-red-500"
