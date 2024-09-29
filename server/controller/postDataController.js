@@ -120,5 +120,20 @@ const Getallpostbyemail = async (req, res) => {
 };
 
 
+const GetPostCountByCreatorId = async (req, res) => {
+    const { postcreaterId } = req.body; // Extract postcreaterId from the request body
+
+    try {
+        // Count the number of posts created by the specified postcreaterId
+        const postCount = await postdata.countDocuments({ postcreaterId: postcreaterId });
+
+        // Return the count in the response
+        res.status(200).json({ postCount: postCount });
+    } catch (error) {
+        res.status(500).json({ message: "An error occurred", error: error.message });
+    }
+};
+
+
   
-module.exports = { Add_post_with_email, Delete_post_by_id, Update_post_by_id, Getallpost, Getallpostbyemail };
+module.exports = { Add_post_with_email, Delete_post_by_id, Update_post_by_id, Getallpost, Getallpostbyemail ,GetPostCountByCreatorId };
