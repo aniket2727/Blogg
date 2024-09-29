@@ -26,25 +26,39 @@ db.once('open', () => {
 // Import the routes
 const add_user_router = require('./router/userinfoRouter');
 const login_user_router=require('./router/userinfoRouter');
+
 const update_user_password=require('./router/updatePasswordRouter');
+
 const add_postdata_router=require('./router/postDataRouter');
 const delete_post_by_id_router=require('./router/deletePostRouter');
 const getallpost=require('./router/postDataRouter');
 const postbyemail=require('./router/postDataRouter');
+const postcountId=require('./router/postDataRouter');
+
 const postcomment=require('./router/commentRouter');
+
 const addfollower=require('./router/followerRouter');
 const removefollower=require('./router/followerRouter');
 const followerscount=require('./router/followerRouter');
 const getfollowerswithUserinfo=require('./router/followerRouter');
 
 // Use the routes
+//auth
 app.use('/app', add_user_router);
 app.use('/app1', login_user_router);
+
+//password issue
 app.use('/app/password', update_user_password);
 app.use('/app/post', add_postdata_router);
+
 app.use('/d', delete_post_by_id_router);
+
+//post data
 app.use('/app',getallpost);
 app.use('/post',postbyemail);
+app.use('/app',postcountId);
+
+//comment and followers
 app.use('/c',postcomment);
 app.use('/app',addfollower);
 app.use('/app',removefollower);

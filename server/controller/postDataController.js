@@ -112,12 +112,36 @@ const Getallpostbyemail = async (req, res) => {
         if (findallpostbyemail.length > 0) {
             res.status(200).json({ message: findallpostbyemail });
         } else {
-            res.status(404).json({ message: "No post for this email" });
+            res.status(401).json({ message: "No post for this email" });
         }
     } catch (error) {
         res.status(500).json({ message: "An error occurred", error: error.message });
     }
 };
 
+const GetPostCountById = async (req, res) => {
+    const { userid } = req.body;
 
-module.exports = { Add_post_with_email, Delete_post_by_id, Update_post_by_id, Getallpost, Getallpostbyemail };
+    try {
+        if (!userid) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const findallPostbyId = await postdata.find({ postcreaterId: userid });
+
+        if (!findallPostbyId) {
+            return res.status(404).json({ message: "No posts found for this user" });
+        }
+
+        const postCount = findallPostbyId.length;
+        console.log(postCount);
+
+        // Return the post count in the response
+        res.status(200).json({ postCount });
+    } catch (error) {
+        console.error("The error is: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+module.exports = { Add_post_with_email, Delete_post_by_id, Update_post_by_id, Getallpost, Getallpostbyemail,GetPostCountById };
