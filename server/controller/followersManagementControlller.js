@@ -152,9 +152,44 @@ const GetFollowersWithUserInfo = async (req, resp) => {
 };
 
 
+// Get all users followed by a specific user
+const GetFollowedUsersById = async (req, resp) => {
+  try {
+    const { newFollowerId } = req.body; // Get the newFollowerId from the request body
+    console.log("Checking for users followed by ID: ", newFollowerId);
+
+    // Validate input
+    if (!newFollowerId) {
+      return resp.status(400).json({ message: 'New follower ID is required' });
+    }
+
+    // Find all records in the followingDataModel where followersdetails.folllowerid matches newFollowerId
+    const followedUsers = await followersdata.find({
+      "followersdetails.folllowerid": newFollowerId
+    });
+
+    if (!followedUsers.length) {
+      return resp.status(404).json({ message: 'No users followed by this ID' });
+    }
+
+    // Extract user IDs who are followed by the specified newFollowerId
+    const followedUserIds = followedUsers.map(user => user.userid);
+
+    return resp.status(200).json({
+      message: 'Followed users retrieved successfully',
+      result: followedUserIds,
+    });
+  } catch (error) {
+    resp.status(500).json({ message: 'Internal server error' });
+    console.error('Error:', error);
+  }
+};
+
+
 module.exports = {
   Addusersintoafollowerslist,
   Removeuserfromfollowerslist,
   GetFollowerCount,
   GetFollowersWithUserInfo,
+  GetFollowedUsersById
 };

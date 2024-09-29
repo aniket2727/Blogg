@@ -40,7 +40,7 @@ const postcomment=require('./router/commentRouter');
 const addfollower=require('./router/followerRouter');
 const removefollower=require('./router/followerRouter');
 const followerscount=require('./router/followerRouter');
-const getfollowerswithUserinfo=require('./router/followerRouter');
+const getfolloweduserid=require('./router/followerRouter');
 
 // Use the routes
 //auth
@@ -63,7 +63,8 @@ app.use('/c',postcomment);
 app.use('/app',addfollower);
 app.use('/app',removefollower);
 app.use('/g',followerscount);
-app.use('/app',getfollowerswithUserinfo);
+//app.use('/app',getfollowerswithUserinfo);
+app.use('/app',getfolloweduserid);
 
 
 app.listen(port, () => {
