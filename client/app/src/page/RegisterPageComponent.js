@@ -31,9 +31,13 @@ const RegisterPageComponent = () => {
 
         try {
             const result = await Registerapis(data);
+
+            if (result.error) {
+                throw new Error(result.error); // Throw an error for failed registration
+            }
+
             setStatus("Registration successful");
             setData(result);
-            setError(false);
         } catch (error) {
             setStatus(error.message || "Failed to register");
             setError(true);

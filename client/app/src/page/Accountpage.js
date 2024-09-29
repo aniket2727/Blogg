@@ -1,23 +1,29 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useContext } from 'react';
-import { FaUserCircle, FaSignInAlt, FaUsers } from 'react-icons/fa'; // React icons
+import { FaUserCircle, FaSignInAlt} from 'react-icons/fa';
 import ButtonComponent from '../component/ButtonComponent';
 import { useNavigate } from 'react-router-dom';
 import LoginDetailsContext from '../contextApis/LoginDetailsContext';
 import { Getallpostbyemails } from '../customHook/GetpostByEmailApi';
 import Postbyuser from '../component/PostByuser';
 import { useSelector } from 'react-redux';
-import { selectToken } from '../features/token/tokenSlice'; // Adjust the path accordingly
+import { selectToken } from '../features/token/tokenSlice';
 import { selectuserid } from '../features/userID/userIdSlice';
+import usePostCount from '../customHook/GetPostCountApi';
+import useFollowingCount from '../customHook/GetfollowingcountApi';
 import { Getfollowerscount } from '../customHook/AddfollowersApi';
 
 const Accountpage = () => {
   const [data, setData] = useState([]);
-  const [followersCount, setFollowersCount] = useState(0); // Initialize as a number
+  const [followersCount, setFollowersCount] = useState(0);
   const navigate = useNavigate();
   const { userEmail } = useContext(LoginDetailsContext);
   const token = useSelector(selectToken);
   const userId = useSelector(selectuserid);
+
+  // Use the custom hooks at the top level
+  const postcount = usePostCount(userId);  // Call usePostCount here
+  const followingcount = useFollowingCount(userId);  // Call useFollowingCount here
 
   // Fetch all posts by email
   useEffect(() => {
@@ -71,23 +77,27 @@ const Accountpage = () => {
         <FaUserCircle className="text-blue-500 text-6xl mb-4" />
         <h1 className="text-3xl font-bold mb-2">Account Page</h1>
         <h2 className="text-xl mb-6">
-          Your email: 
+          Your email:
           <span className="font-semibold text-blue-600 underline flex items-center">
-            <FaUserCircle className="mr-2" /> {/* Profile icon */}
+            <FaUserCircle className="mr-2" />
             {userEmail}
           </span>
         </h2>
 
         <h2 className="text-xl mb-6">
-          Followers : 
+          Followers:
           <span className="font-semibold text-blue-600">{followersCount}</span>
         </h2>
+        <h2 className="text-xl mb-6">
+          Following:
+          <span className="font-semibold text-blue-600">{followingcount}</span>
+        </h2>
+        <h2 className="text-xl mb-6">
+          Posts:
+          <span className="font-semibold text-blue-600">{postcount}</span>
+        </h2>
 
-        <ButtonComponent
-          buttonText="Followers"
-          className="bg-green-500 text-white px-6 py-2 mb-4 rounded-full hover:bg-green-600 transition duration-300 flex items-center"
-          icon={<FaUsers className="mr-2" />}
-        />
+      
       </div>
       <Postbyuser data={data} />
     </div>
