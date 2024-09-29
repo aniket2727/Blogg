@@ -42,7 +42,7 @@ function ProfileDialog({ onClose, open, userInfo, anchorEl }) {
           <ListItemText primary="Post Count" secondary={postCount} />
         </ListItem>
         <ListItem>
-          <ListItemText primary="Followers" secondary={followers} />
+          <ListItemText primary="Following" secondary={followers} />
         </ListItem>
         <ListItem>
           <Button

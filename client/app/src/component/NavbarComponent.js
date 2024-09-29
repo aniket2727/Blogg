@@ -5,7 +5,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import debounce from 'lodash/debounce';
 import { IconButton, Avatar } from '@mui/material';
-import { blue } from '@mui/material/colors';
 import { FaUserCircle } from 'react-icons/fa'; // Import the user icon from react-icons
 
 import ButtonComponent from './ButtonComponent'; // Custom Button Component
@@ -14,9 +13,13 @@ import LoginDetailsContext from '../contextApis/LoginDetailsContext'; // Context
 import { clearToken, selectToken } from '../features/token/tokenSlice'; // Redux slice for token
 import { clearUserId, selectuserid } from '../features/userID/userIdSlice'; // Redux slice for userId
 
+// Import the custom hooks to fetch post count and followed count
+import usePostCount from '../customHook/GetPostCountApi';
+import useFollowingCount from '../customHook/GetfollowingcountApi';
+
 const NavbarComponent = () => {
   // Context API hooks
-  const {userEmail, setUserEmail } = useContext(LoginDetailsContext);
+  const { userEmail, setUserEmail } = useContext(LoginDetailsContext);
 
   // Redux hooks
   const dispatch = useDispatch();
@@ -31,11 +34,15 @@ const NavbarComponent = () => {
   const [open, setOpen] = useState(false);
   const [loginStatus, setLoginStatus] = useState(false);
 
+  // Fetch post count and following count using custom hooks
+  const postCount = usePostCount(userId); // Pass userId to fetch post count
+  const followingCount = useFollowingCount(userId); // Pass userId to fetch following count
+
   // Example user data (can be passed as props if needed)
   const userInfo = {
     email: userEmail,
-    followers: 120,
-    postCount: 45,
+    followers: followingCount, // Use the following count from the API
+    postCount: postCount, // Use the post count from the API
   };
 
   // Handle profile dialog open/close
@@ -80,6 +87,7 @@ const NavbarComponent = () => {
         <IconButton onClick={handleClickOpen}>
           <FaUserCircle size={30} color="white" /> {/* Icon with customizable size and color */}
         </IconButton>
+        {/* Pass userInfo to the ProfileDialog which includes the post count and followers */}
         <ProfileDialog open={open} onClose={handleClose} userInfo={userInfo} />
       </div>
 
